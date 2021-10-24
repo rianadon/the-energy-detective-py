@@ -18,3 +18,9 @@ reader = await createTED(HOST)
 await reader.update()
 reader.print_to_console()
 ```
+
+## Testing
+
+To print out your energy meter's values, run `poetry run python -m tedpy`.
+
+The module's tests can be run using `poetry run pytest` (make sure you `poetry install` first!).
