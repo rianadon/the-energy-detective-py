@@ -1,12 +1,14 @@
 [tool.poetry]
 name = "tedpy"
-version = "0.1.0"
+version = "0.1.1"
 description = "Unofficial library for reading from The Energy Detective power meters"
 authors = ["rianadon"]
+repository = "https://github.com/rianadon/the-energy-detective-py"
+documentation = "https://github.com/rianadon/the-energy-detective-py#readme"
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.5"
 httpx = "^0.20.0"
 xmltodict = "^0.12.0"
 
