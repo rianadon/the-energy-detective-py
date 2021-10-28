@@ -1,5 +1,7 @@
 import asyncio
 
+from enum import Enum
+
 from .ted import *
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
@@ -10,6 +12,19 @@ ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
 
 class TED6000(TED):
     """Instance of TED6000"""
+
+    class SystemType(Enum):
+        """TED6000 Defined MTU configuration of the system"""
+        NET = 0
+        NET_GENERATION = 1
+        NET_LOAD = 2
+
+    class MtuType(Enum):
+        """TED6000 Defined MTU configuration types"""
+        NET = 0
+        LOAD = 1
+        GENERATION = 2
+        STAND_ALONE = 3
 
     def __init__(self, host, async_client=None):
         super().__init__(host, async_client)
@@ -50,14 +65,14 @@ class TED6000(TED):
     @property
     def system_type(self):
         """Return the system type, represented by a number."""
-        return self.endpoint_settings_results["SystemSettings"]["Configuration"][
-            "SystemType"
-        ]
+        return TED6000.SystemType(int(self.endpoint_settings_results[
+            "SystemSettings"]["Configuration"]["SystemType"
+        ]))
 
     @property
     def num_mtus(self):
         """Return the number of MTUs."""
-        return self.endpoint_settings_results["SystemSettings"]["NumberMTU"]
+        return int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
 
     @property
     def polling_delay(self):
@@ -98,16 +113,15 @@ class TED6000(TED):
         ]
 
         for mtu_doc in mtu_settings:
-            mtu_id = mtu_doc["MTUID"]
-            mtu_number = int(mtu_doc["MTUNumber"])
-            if mtu_id != "000000":
+            if(len(self.mtus) < self.num_mtus):
+                mtu_number = int(mtu_doc["MTUNumber"])
                 mtu = TedMtu(
-                    mtu_id,
+                    mtu_doc["MTUID"],
                     mtu_number,
                     mtu_doc["MTUDescription"],
-                    config_settings["MTUType%d" % mtu_number],
-                    int(mtu_doc["PowerCalibrationFactor"]),
-                    int(mtu_doc["VoltageCalibrationFactor"]),
+                    TED6000.MtuType(int(config_settings["MTUType%d" % mtu_number])),
+                    int(mtu_doc["PowerCalibrationFactor"]) / 10,
+                    int(mtu_doc["VoltageCalibrationFactor"]) / 10,
                 )
                 self.mtus.append(mtu)
 

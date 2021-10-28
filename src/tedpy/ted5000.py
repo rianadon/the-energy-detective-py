@@ -1,5 +1,7 @@
 import asyncio
 
+from enum import Enum
+
 from .ted import *
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
@@ -8,6 +10,13 @@ ENDPOINT_URL_DATA = "http://{}/api/LiveData.xml"
 
 class TED5000(TED):
     """Instance of TED5000"""
+
+    class SolarConfigs(Enum):
+        """TED5000 Defined Solar MTU Types"""
+        LOAD = 0
+        GENERATION = 1
+        ADJ_LOAD = 2
+        STAND_ALONE = 3
 
     def __init__(self, host, async_client=None):
         super().__init__(host, async_client)
@@ -78,7 +87,7 @@ class TED5000(TED):
                     mtu_id,
                     mtu_number,
                     mtu_doc["MTUDescription"],
-                    int(solar_settings["SolarConfig%d" % mtu_number]),
+                    TED5000.SolarConfigs(int(solar_settings["SolarConfig%d" % mtu_number])),
                     int(mtu_doc["PowerCalibrationFactor"]),
                     int(mtu_doc["VoltageCalibrationFactor"]),
                 )
