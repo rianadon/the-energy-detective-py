@@ -76,7 +76,7 @@ class TED6000(TED):
         ]
         value = int(mtu_doc["Value"])
         ap_power = int(mtu_doc["KVA"])
-        power_factor = int(mtu_doc["PF"])
+        power_factor = int(mtu_doc["PF"]) / 10
         voltage = int(mtu_doc["Voltage"]) / 10
         return MtuConsumption(value, ap_power, power_factor, voltage)
 

@@ -32,14 +32,45 @@ async def test_ted_5000():
 
     assert reader.gateway_id == "2154E6"
     assert reader.gateway_description == "Demo System"
+
+    assert reader.total_consumption().now == 9632
+    assert reader.total_consumption().daily == 38553
+    assert reader.total_consumption().mtd == 277266
+
     assert reader.num_mtus == 4
     assert len(reader.mtus) == 4
-    assert reader.total_consumption().now == 9632
+    assert reader.mtus[0].id == '109CE0'
+    assert reader.mtus[0].description == 'Pan 1'
+    assert reader.mtus[0].type == 0
+    assert reader.mtus[0].power_cal_factor == 100
+    assert reader.mtus[0].voltage_cal_factor == 100
+    assert reader.mtus[1].id == '109CAD'
+    assert reader.mtus[1].description == 'Pan 2'
+    assert reader.mtus[1].type == 0
+    assert reader.mtus[1].power_cal_factor == 100
+    assert reader.mtus[1].voltage_cal_factor == 100
+    assert reader.mtus[2].id == '109D3A'
+    assert reader.mtus[2].description == 'AC DN'
+    assert reader.mtus[2].type == 3
+    assert reader.mtus[2].power_cal_factor == 100
+    assert reader.mtus[2].voltage_cal_factor == 100
+    assert reader.mtus[3].id == '109E8B'
+    assert reader.mtus[3].description == 'AC UP'
+    assert reader.mtus[3].type == 3
+    assert reader.mtus[3].power_cal_factor == 100
+    assert reader.mtus[3].voltage_cal_factor == 100
+
     assert reader.mtu_consumption(reader.mtus[0]).current_usage == 5840
+    assert reader.mtu_consumption(reader.mtus[0]).apparent_power == 6062
+    assert reader.mtu_consumption(reader.mtus[0]).power_factor == 96.3
     assert reader.mtu_consumption(reader.mtus[0]).voltage == 1197
     assert reader.mtu_consumption(reader.mtus[1]).current_usage == 438
+    assert reader.mtu_consumption(reader.mtus[1]).apparent_power == 462
+    assert reader.mtu_consumption(reader.mtus[1]).power_factor == 94.8
     assert reader.mtu_consumption(reader.mtus[1]).voltage == 1196
     assert reader.mtu_consumption(reader.mtus[2]).current_usage == 3354
+    assert reader.mtu_consumption(reader.mtus[2]).apparent_power == 3680
+    assert reader.mtu_consumption(reader.mtus[2]).power_factor == 91.1
     assert reader.mtu_consumption(reader.mtus[2]).voltage == 1189
 
 @pytest.mark.asyncio
@@ -71,7 +102,7 @@ async def test_ted_6000():
     assert reader.mtus[0].description == 'Panel1'
     assert reader.mtu_consumption(reader.mtus[0]).current_usage == 3254
     assert reader.mtu_consumption(reader.mtus[0]).apparent_power == 3344
-    assert reader.mtu_consumption(reader.mtus[0]).power_factor == 973
+    assert reader.mtu_consumption(reader.mtus[0]).power_factor == 97.3
     assert reader.mtu_consumption(reader.mtus[0]).voltage == 123
     assert reader.mtu_consumption(reader.mtus[1]).voltage == 123
 
@@ -81,3 +112,4 @@ async def test_ted_6000():
     assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).now == 568
     assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).daily == 4672
     assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).mtd == 96045
+    

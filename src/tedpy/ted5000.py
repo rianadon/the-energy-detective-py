@@ -48,15 +48,21 @@ class TED5000(TED):
     def total_consumption(self):
         """Return consumption information for the whole system."""
         data = self.endpoint_data_results["LiveData"]
-        power = int(data["Power"]["Total"]["PowerNow"])
-        return Consumption(power, 0, 0)
+        power_now = int(data["Power"]["Total"]["PowerNow"])
+        power_day = int(data["Power"]["Total"]["PowerTDY"])
+        power_mtd = int(data["Power"]["Total"]["PowerMTD"])
+        return Consumption(power_now, power_day, power_mtd)
 
     def mtu_consumption(self, mtu):
         """Return consumption information for a MTU."""
         data = self.endpoint_data_results["LiveData"]
-        power = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
+        power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
+        ap_power = int(data["Power"]["MTU%d" % mtu.position]["KVA"])
+        power_factor = 0
+        if(ap_power > 0):
+            power_factor = round(((power_now / ap_power) * 100), 1)
         voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"])
-        return MtuConsumption(power, 0, 0, voltage)
+        return MtuConsumption(power_now, ap_power, power_factor, voltage)
 
     def _parse_mtus(self):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
