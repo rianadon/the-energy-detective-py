@@ -47,7 +47,7 @@ async def test_ted_6000():
         return_value=Response(200, text=_load_fixture("ted6000", "systemOverview.xml"))
     )
     respx.get("/api/SpyderData.xml").mock(
-        return_value=Response(200, text=_load_fixture("ted6000", "spyderdata.xml"))
+        return_value=Response(200, text=_load_fixture("ted6000", "spyderData.xml"))
     )
 
     reader = await createTED("127.0.0.1")
