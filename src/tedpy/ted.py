@@ -64,7 +64,7 @@ class TED:
         """Return consumption information for a spyder ctgroup."""
         raise NotImplementedError()
 
-    async def _check_endpooint(self, url):
+    async def _check_endpoint(self, url):
         formatted_url = url.format(self.host)
         response = await self._async_fetch_with_retry(formatted_url)
         return response.status_code < 300

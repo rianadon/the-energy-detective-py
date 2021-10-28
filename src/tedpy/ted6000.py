@@ -33,7 +33,7 @@ class TED6000(TED):
 
     async def check(self):
         """Check if the required endpoint are accessible."""
-        return await self._check_endpooint(ENDPOINT_URL_SETTINGS)
+        return await self._check_endpoint(ENDPOINT_URL_SETTINGS)
 
     @property
     def gateway_id(self):
