@@ -2,6 +2,7 @@ import asyncio
 
 from .ted import *
 
+ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
 ENDPOINT_URL_DATA = "http://{}/api/LiveData.xml"
 
 
@@ -11,11 +12,13 @@ class TED5000(TED):
     def __init__(self, host, async_client=None):
         super().__init__(host, async_client)
 
+        self.endpoint_settings_results = None
         self.endpoint_data_results = None
 
     async def update(self):
         """Fetch data from the endpoints."""
         await asyncio.gather(
+            self._update_endpoint("endpoint_settings_results", ENDPOINT_URL_SETTINGS),
             self._update_endpoint("endpoint_data_results", ENDPOINT_URL_DATA),
         )
 
@@ -28,7 +31,19 @@ class TED5000(TED):
     @property
     def gateway_id(self):
         """Return the id / serial number for the gateway."""
-        return "ted5000"
+        return self.endpoint_settings_results["SystemSettings"]["Gateway"]["GatewayID"]
+
+    @property
+    def gateway_description(self):
+        """Return the description for the gateway."""
+        return self.endpoint_settings_results["SystemSettings"]["Gateway"][
+            "GatewayDescription"
+        ]
+
+    @property
+    def num_mtus(self):
+        """Return the number of MTUs."""
+        return int(self.endpoint_data_results["LiveData"]["System"]["NumberMTU"])
 
     def total_consumption(self):
         """Return consumption information for the whole system."""
@@ -47,6 +62,5 @@ class TED5000(TED):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
         self.mtus = []
 
-        num_mtus = int(self.endpoint_data_results["LiveData"]["System"]["NumberMTU"])
-        for mtu in range(1, num_mtus + 1):
+        for mtu in range(1, self.num_mtus + 1):
             self.mtus.append(TedMtu("-", mtu, "mtu %d" % mtu, 0, 0, 0))

@@ -20,17 +20,26 @@ def _load_fixture(version, name) -> dict:
 @respx.mock
 async def test_ted_5000():
     """Verify TED 5000 API."""
+    respx.get("/api/SystemSettings.xml").mock(
+        return_value=Response(200, text=_load_fixture("ted5000", "systemSettings.xml"))
+    )
     respx.get("/api/LiveData.xml").mock(
-        return_value=Response(200, text=_load_fixture("ted5000", "data.xml"))
+        return_value=Response(200, text=_load_fixture("ted5000", "liveData.xml"))
     )
 
     reader = await createTED("127.0.0.1")
     await reader.update()
 
-    assert reader.total_consumption().now == 3577
-    assert len(reader.mtus) == 1
-    assert reader.mtu_consumption(reader.mtus[0]).current_usage == 3577
-    assert reader.mtu_consumption(reader.mtus[0]).voltage == 1198
+    assert reader.gateway_id == "2154E6"
+    assert reader.gateway_description == "Demo System"
+    assert reader.total_consumption().now == 9632
+    assert len(reader.mtus) == 3
+    assert reader.mtu_consumption(reader.mtus[0]).current_usage == 5840
+    assert reader.mtu_consumption(reader.mtus[0]).voltage == 1197
+    assert reader.mtu_consumption(reader.mtus[1]).current_usage == 438
+    assert reader.mtu_consumption(reader.mtus[1]).voltage == 1196
+    assert reader.mtu_consumption(reader.mtus[2]).current_usage == 3354
+    assert reader.mtu_consumption(reader.mtus[2]).voltage == 1189
 
 @pytest.mark.asyncio
 @respx.mock

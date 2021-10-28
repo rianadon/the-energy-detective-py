@@ -52,6 +52,11 @@ class TED:
         """Return the id / serial number for the gateway."""
         return "ted"
 
+    @property
+    def gateway_description(self):
+        """Return the description for the gateway."""
+        return ""
+
     def total_consumption(self):
         """Return consumption information for the whole system."""
         raise NotImplementedError()
