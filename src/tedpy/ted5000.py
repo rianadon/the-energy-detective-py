@@ -43,7 +43,7 @@ class TED5000(TED):
     @property
     def num_mtus(self):
         """Return the number of MTUs."""
-        return int(self.endpoint_data_results["LiveData"]["System"]["NumberMTU"])
+        return int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
 
     def total_consumption(self):
         """Return consumption information for the whole system."""
@@ -62,5 +62,18 @@ class TED5000(TED):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
         self.mtus = []
 
-        for mtu in range(1, self.num_mtus + 1):
-            self.mtus.append(TedMtu("-", mtu, "mtu %d" % mtu, 0, 0, 0))
+        mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
+        solar_settings = self.endpoint_settings_results["SystemSettings"]["Solar"]
+        for mtu_doc in mtu_settings:
+            if(len(self.mtus) < self.num_mtus):
+                mtu_id = mtu_doc["MTUID"]
+                mtu_number = int(mtu_doc["MTUNumber"])
+                mtu = TedMtu(
+                    mtu_id,
+                    mtu_number,
+                    mtu_doc["MTUDescription"],
+                    int(solar_settings["SolarConfig%d" % mtu_number]),
+                    int(mtu_doc["PowerCalibrationFactor"]),
+                    int(mtu_doc["VoltageCalibrationFactor"]),
+                )
+                self.mtus.append(mtu)

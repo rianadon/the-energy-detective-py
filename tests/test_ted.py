@@ -32,8 +32,9 @@ async def test_ted_5000():
 
     assert reader.gateway_id == "2154E6"
     assert reader.gateway_description == "Demo System"
+    assert reader.num_mtus == 4
+    assert len(reader.mtus) == 4
     assert reader.total_consumption().now == 9632
-    assert len(reader.mtus) == 3
     assert reader.mtu_consumption(reader.mtus[0]).current_usage == 5840
     assert reader.mtu_consumption(reader.mtus[0]).voltage == 1197
     assert reader.mtu_consumption(reader.mtus[1]).current_usage == 438
