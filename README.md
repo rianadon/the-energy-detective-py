@@ -24,3 +24,9 @@ reader.print_to_console()
 To print out your energy meter's values, run `poetry run python -m tedpy`.
 
 The module's tests can be run using `poetry run pytest` (make sure you `poetry install` first!).
+
+## Development
+
+1. Install dependencies: `poetry install`
+2. Install pre-commit hooks: `poetry run pre-commit install`
+3. Develop!

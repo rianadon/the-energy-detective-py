@@ -1,11 +1,14 @@
 """Module to read energy consumption from a TED energy meter."""
+import httpx
+
+from .ted import TED
 from .ted5000 import TED5000
 from .ted6000 import TED6000
 
 TED_CLASSES = [TED5000, TED6000]
 
 
-async def createTED(host, async_client=None):
+async def createTED(host: str, async_client: httpx.AsyncClient = None) -> TED:
     """Create the appropriate TED client."""
     for cls in TED_CLASSES:
         ted = cls(host, async_client)

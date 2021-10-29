@@ -1,88 +1,145 @@
 """Base class for TED energy meters."""
-import asyncio
-from enum import Enum
 import logging
-import xmltodict
-from collections import namedtuple
-import httpx
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, List, NamedTuple
 
-from .formatting import *
+import httpx
+import xmltodict
+
+from .formatting import (
+    format_consumption,
+    format_ct,
+    format_ctgroup,
+    format_mtu,
+    format_spyder,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-TedMtu = namedtuple(
-    "TedMtu",
-    ["id", "position", "description", "type", "power_cal_factor", "voltage_cal_factor"],
-)
-TedSpyder = namedtuple("TedSpyder", ["position", "secondary", "mtu_parent", "ctgroups"])
-TedCt = namedtuple("TedCt", ["position", "description", "type", "multiplier"])
-TedCtGroup = namedtuple("TedCtGroup", ["position", "description", "member_cts"])
 
-Consumption = namedtuple("Consumption", ["now", "daily", "mtd"])
-MtuNet = namedtuple(
-    "MtuNet", ["type", "now", "apparent_power", "power_factor", "voltage"]
-)
+class MtuType(Enum):
+    """TED Defined MTU configuration types."""
+
+    NET = 0
+    LOAD = 1
+    GENERATION = 2
+    STAND_ALONE = 3
+
+
+@dataclass
+class TedMtu:
+    """MTU panel for the energy meter."""
+
+    id: str
+    position: int
+    description: str
+    type: MtuType
+    power_cal_factor: float
+    voltage_cal_factor: float
+
+
+@dataclass
+class TedCt:
+    """Individual reading on a Spyder."""
+
+    position: int
+    description: str
+    type: int
+    multiplier: int
+
+
+@dataclass
+class TedCtGroup:
+    """Group of readings on a Spyder."""
+
+    position: int
+    description: str
+    member_cts: List[TedCt]
+
+
+@dataclass
+class TedSpyder:
+    """Spyder unit for the energy meter."""
+
+    position: int
+    secondary: int
+    mtu_parent: str
+    ctgroups: List[TedCtGroup]
+
+
+class Consumption(NamedTuple):
+    """Consumption for both totals and per Spyder."""
+
+    now: int
+    daily: int
+    mtd: int
+
+
+class MtuNet(NamedTuple):
+    """Consumption or Production for an MTU."""
+
+    type: MtuType
+    now: int
+    apparent_power: int
+    power_factor: float
+    voltage: float
 
 
 class TED:
-    """Instance of TED"""
+    """Instance of TED."""
 
-    class MtuType(Enum):
-        """TED Defined MTU configuration types"""
-        NET = 0
-        LOAD = 1
-        GENERATION = 2
-        STAND_ALONE = 3
-
-    def __init__(self, host, async_client=None):
+    def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
         """Init the TED."""
         self.host = host.lower()
 
-        self.mtus = []
-        self.spyders = []
+        self.mtus: List[TedMtu] = []
+        self.spyders: List[TedSpyder] = []
         self._async_client = async_client
 
     @property
-    def async_client(self):
+    def async_client(self) -> httpx.AsyncClient:
         """Return the httpx client."""
         return self._async_client or httpx.AsyncClient()
 
-    async def update(self):
+    async def update(self) -> None:
         """Fetch data from the endpoints."""
         raise NotImplementedError()
 
-    async def check(self):
+    async def check(self) -> bool:
         """Check if the required endpoint are accessible."""
         raise NotImplementedError()
 
     @property
-    def gateway_id(self):
+    def gateway_id(self) -> str:
         """Return the id / serial number for the gateway."""
         return "ted"
 
     @property
-    def gateway_description(self):
+    def gateway_description(self) -> str:
         """Return the description for the gateway."""
         return ""
 
-    def total_consumption(self):
+    def total_consumption(self) -> Consumption:
         """Return consumption information for the whole system."""
         raise NotImplementedError()
 
-    def mtu_value(self, mtu):
+    def mtu_value(self, mtu: TedMtu) -> MtuNet:
         """Return consumption or production information for a MTU based on type."""
         raise NotImplementedError()
 
-    def spyder_ctgroup_consumption(self, spyder, ctgroup):
+    def spyder_ctgroup_consumption(
+        self, spyder: TedSpyder, ctgroup: TedCtGroup
+    ) -> Consumption:
         """Return consumption information for a spyder ctgroup."""
         raise NotImplementedError()
 
-    async def _check_endpoint(self, url):
+    async def _check_endpoint(self, url: str) -> bool:
         formatted_url = url.format(self.host)
         response = await self._async_fetch_with_retry(formatted_url)
         return response.status_code < 300
 
-    async def _update_endpoint(self, attr, url):
+    async def _update_endpoint(self, attr: str, url: str) -> None:
         formatted_url = url.format(self.host)
         response = await self._async_fetch_with_retry(formatted_url)
         try:
@@ -92,7 +149,7 @@ class TED:
 
         _LOGGER.debug("Fetched from %s: %s: %s", formatted_url, response, response.text)
 
-    async def _async_fetch_with_retry(self, url, **kwargs):
+    async def _async_fetch_with_retry(self, url: str, **kwargs: Any) -> Any:
         """Retry 3 times to fetch the url if there is a transport error."""
         for attempt in range(3):
             try:
@@ -102,7 +159,7 @@ class TED:
                 if attempt == 2:
                     raise
 
-    def print_to_console(self):
+    def print_to_console(self) -> None:
         """Print all the settings and consumption values to the console."""
         print("Gateway id:", self.gateway_id)
         print("Consumption:", format_consumption(self.total_consumption()))
