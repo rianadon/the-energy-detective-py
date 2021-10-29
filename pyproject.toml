@@ -9,7 +9,7 @@ license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.5"
+python = "^3.7"
 httpx = "^0.20.0"
 xmltodict = "^0.12.0"
 
@@ -17,6 +17,8 @@ xmltodict = "^0.12.0"
 pytest = "^6.2.5"
 respx = "^0.18.2"
 pytest-asyncio = "^0.16.0"
+pre-commit = "^2.15.0"
+isort = "^5.9.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -27,3 +29,6 @@ build-backend = "poetry.core.masonry.api"
 disallow_untyped_defs = true
 # disallow-incomplete-defs = true
 ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"

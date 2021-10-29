@@ -1,9 +1,10 @@
 """Base class for TED energy meters."""
-from typing import Any, List, NamedTuple
-from dataclasses import dataclass
 import logging
-import xmltodict
+from dataclasses import dataclass
+from typing import Any, List, NamedTuple
+
 import httpx
+import xmltodict
 
 from .formatting import (
     format_consumption,
@@ -18,6 +19,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class TedMtu:
+    """MTU panel for the energy meter."""
+
     id: str
     position: int
     description: str
@@ -28,6 +31,8 @@ class TedMtu:
 
 @dataclass
 class TedCt:
+    """Individual reading on a Spyder."""
+
     position: int
     description: str
     type: int
@@ -36,6 +41,8 @@ class TedCt:
 
 @dataclass
 class TedCtGroup:
+    """Group of readings on a Spyder."""
+
     position: int
     description: str
     member_cts: List[TedCt]
@@ -43,6 +50,8 @@ class TedCtGroup:
 
 @dataclass
 class TedSpyder:
+    """Spyder unit for the energy meter."""
+
     position: int
     secondary: int
     mtu_parent: str
@@ -50,12 +59,16 @@ class TedSpyder:
 
 
 class Consumption(NamedTuple):
+    """Consumption for both totals and per Spyder."""
+
     now: int
     daily: int
     mtd: int
 
 
 class MtuConsumption(NamedTuple):
+    """Consumption for an MTU."""
+
     current_usage: int
     apparent_power: int
     power_factor: float
@@ -63,7 +76,7 @@ class MtuConsumption(NamedTuple):
 
 
 class TED:
-    """Instance of TED"""
+    """Instance of TED."""
 
     def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
         """Init the TED."""

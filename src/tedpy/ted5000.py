@@ -1,15 +1,18 @@
-from typing import Any
 import asyncio
+from typing import Any
 
-from .ted import *
+import httpx
+
+from .ted import TED, Consumption, MtuConsumption, TedMtu
 
 ENDPOINT_URL_DATA = "http://{}/api/LiveData.xml"
 
 
 class TED5000(TED):
-    """Instance of TED5000"""
+    """Instance of TED5000."""
 
     def __init__(self, host: str, async_client: httpx.AsyncClient = None):
+        """Init the TED5000."""
         super().__init__(host, async_client)
 
         self.endpoint_data_results: Any = None

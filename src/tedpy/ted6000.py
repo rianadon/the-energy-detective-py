@@ -1,8 +1,9 @@
-from typing import Any
 import asyncio
+from typing import Any
 
 import httpx
-from .ted import MtuConsumption, Consumption, TedMtu, TedSpyder, TED, TedCtGroup, TedCt
+
+from .ted import TED, Consumption, MtuConsumption, TedCt, TedCtGroup, TedMtu, TedSpyder
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
 ENDPOINT_URL_DASHBOARD = "http://{}/api/DashData.xml?T=0&D=0&M=0"
