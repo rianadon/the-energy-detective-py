@@ -4,7 +4,7 @@ Unofficial library for reading from The Energy Detective power meters
 
 This library supports the TED5000 and TED6000 devices.
 
-It is based on @realumhelp's [ted6000py](https://github.com/realumhelp/ted6000py), Home Assistant's ted5000 implementation, and @gtdiehl and @jesserizzo's [envoy_reader](https://github.com/gtdiehl/envoy_reader/).
+It is based on @realumhelp's [ted6000py](https://github.com/realumhelp/ted6000py), Home Assistant's ted5000 implementation, and @gtdiehl and @jesserizzo's [envoy_reader](https://github.com/gtdiehl/envoy_reader/). Also huge thanks to @realumhelp for patching support for consumption/production distinction!
 
 ## Usage
 

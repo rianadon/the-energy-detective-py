@@ -12,7 +12,7 @@ ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
 
 
 class TED6000(TED):
-    """Instance of TED6000"""
+    """Instance of TED6000."""
 
     def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
         super().__init__(host, async_client)
