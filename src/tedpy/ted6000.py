@@ -1,6 +1,8 @@
+from typing import Any
 import asyncio
 
-from .ted import *
+import httpx
+from .ted import MtuConsumption, Consumption, TedMtu, TedSpyder, TED, TedCtGroup, TedCt
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
 ENDPOINT_URL_DASHBOARD = "http://{}/api/DashData.xml?T=0&D=0&M=0"
@@ -11,15 +13,15 @@ ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
 class TED6000(TED):
     """Instance of TED6000"""
 
-    def __init__(self, host, async_client=None):
+    def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
         super().__init__(host, async_client)
 
-        self.endpoint_settings_results = None
-        self.endpoint_dashboard_results = None
-        self.endpoint_mtu_results = None
-        self.endpoint_spyder_results = None
+        self.endpoint_settings_results: Any = None
+        self.endpoint_dashboard_results: Any = None
+        self.endpoint_mtu_results: Any = None
+        self.endpoint_spyder_results: Any = None
 
-    async def update(self):
+    async def update(self) -> None:
         """Fetch data from the endpoints."""
         await asyncio.gather(
             self._update_endpoint("endpoint_settings_results", ENDPOINT_URL_SETTINGS),
@@ -31,45 +33,45 @@ class TED6000(TED):
         self._parse_mtus()
         self._parse_spyders()
 
-    async def check(self):
+    async def check(self) -> bool:
         """Check if the required endpoint are accessible."""
         return await self._check_endpooint(ENDPOINT_URL_SETTINGS)
 
     @property
-    def gateway_id(self):
+    def gateway_id(self) -> str:
         """Return the id / serial number for the gateway."""
         return self.endpoint_settings_results["SystemSettings"]["Gateway"]["GatewayID"]
 
     @property
-    def gateway_description(self):
+    def gateway_description(self) -> str:
         """Return the description for the gateway."""
         return self.endpoint_settings_results["SystemSettings"]["Gateway"][
             "GatewayDescription"
         ]
 
     @property
-    def system_type(self):
+    def system_type(self) -> str:
         """Return the system type, represented by a number."""
         return self.endpoint_settings_results["SystemSettings"]["Configuration"][
             "SystemType"
         ]
 
     @property
-    def num_mtus(self):
+    def num_mtus(self) -> int:
         """Return the number of MTUs."""
         return self.endpoint_settings_results["SystemSettings"]["NumberMTU"]
 
     @property
-    def polling_delay(self):
+    def polling_delay(self) -> int:
         """Return the delay between successive polls of MTU data."""
         return self.endpoint_settings_results["SystemSettings"]["MTUPollingDelay"]
 
-    def total_consumption(self):
+    def total_consumption(self) -> Consumption:
         """Return consumption information for the whole system."""
         data = self.endpoint_dashboard_results["DashData"]
         return Consumption(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
-    def mtu_consumption(self, mtu):
+    def mtu_consumption(self, mtu: TedMtu) -> MtuConsumption:
         """Return consumption information for a MTU."""
         mtu_doc = self.endpoint_mtu_results["DialDataDetail"]["MTUVal"][
             "MTU%d" % mtu.position
@@ -80,7 +82,9 @@ class TED6000(TED):
         voltage = int(mtu_doc["Voltage"]) / 10
         return MtuConsumption(value, ap_power, power_factor, voltage)
 
-    def spyder_ctgroup_consumption(self, spyder, ctgroup):
+    def spyder_ctgroup_consumption(
+        self, spyder: TedSpyder, ctgroup: TedCtGroup
+    ) -> Consumption:
         """Return consumption information for a spyder ctgroup."""
         group_doc = self.endpoint_spyder_results["SpyderData"]["Spyder"][
             spyder.position
@@ -89,7 +93,7 @@ class TED6000(TED):
             int(group_doc["Now"]), int(group_doc["TDY"]), int(group_doc["MTD"])
         )
 
-    def _parse_mtus(self):
+    def _parse_mtus(self) -> None:
         """Fill the list of MTUs with MTUs parsed from the xml data."""
         self.mtus = []
         mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
@@ -111,7 +115,7 @@ class TED6000(TED):
                 )
                 self.mtus.append(mtu)
 
-    def _parse_spyders(self):
+    def _parse_spyders(self) -> None:
         """Fill the list of Spyders with Spyders parsed from the xml data."""
         self.spyders = []
         spyder_settings = self.endpoint_settings_results["SystemSettings"]["Spyders"][
