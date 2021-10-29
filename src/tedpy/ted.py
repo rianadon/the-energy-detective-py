@@ -18,8 +18,8 @@ TedCt = namedtuple("TedCt", ["position", "description", "type", "multiplier"])
 TedCtGroup = namedtuple("TedCtGroup", ["position", "description", "member_cts"])
 
 Consumption = namedtuple("Consumption", ["now", "daily", "mtd"])
-MtuConsumption = namedtuple(
-    "MtuConsumption", ["current_usage", "apparent_power", "power_factor", "voltage"]
+MtuNet = namedtuple(
+    "MtuNet", ["type", "now", "apparent_power", "power_factor", "voltage"]
 )
 
 
@@ -61,8 +61,8 @@ class TED:
         """Return consumption information for the whole system."""
         raise NotImplementedError()
 
-    def mtu_consumption(self, mtu):
-        """Return consumption information for a MTU."""
+    def mtu_value(self, mtu):
+        """Return consumption or production information for a MTU based on type."""
         raise NotImplementedError()
 
     def spyder_ctgroup_consumption(self, spyder, ctgroup):
@@ -103,7 +103,7 @@ class TED:
         print("MTUs:")
         for m in self.mtus:
             print("  " + format_mtu(m))
-            print("    Consumption:", self.mtu_consumption(m))
+            print("    Net:", self.mtu_value(m))
         print()
         print("Spyders:")
         for s in self.spyders:

@@ -62,16 +62,17 @@ class TED5000(TED):
         power_mtd = int(data["Power"]["Total"]["PowerMTD"])
         return Consumption(power_now, power_day, power_mtd)
 
-    def mtu_consumption(self, mtu):
-        """Return consumption information for a MTU."""
+    def mtu_value(self, mtu):
+        """Return consumption or production information for a MTU based on type."""
         data = self.endpoint_data_results["LiveData"]
+        type = "Production" if(mtu.type == TED5000.SolarConfigs.GENERATION) else "Consumption"
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
         ap_power = int(data["Power"]["MTU%d" % mtu.position]["KVA"])
         power_factor = 0
-        if(ap_power > 0):
+        if(ap_power != 0):
             power_factor = round(((power_now / ap_power) * 100), 1)
-        voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"])
-        return MtuConsumption(power_now, ap_power, power_factor, voltage)
+        voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"]) / 10
+        return MtuNet(type, power_now, ap_power, power_factor, voltage)
 
     def _parse_mtus(self):
         """Fill the list of MTUs with MTUs parsed from the xml data."""

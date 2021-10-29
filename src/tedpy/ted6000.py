@@ -84,16 +84,17 @@ class TED6000(TED):
         data = self.endpoint_dashboard_results["DashData"]
         return Consumption(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
-    def mtu_consumption(self, mtu):
-        """Return consumption information for a MTU."""
+    def mtu_value(self, mtu):
+        """Return consumption or production information for a MTU based on type."""
         mtu_doc = self.endpoint_mtu_results["DialDataDetail"]["MTUVal"][
             "MTU%d" % mtu.position
         ]
+        type = "Production" if mtu.type == TED6000.MtuType.GENERATION else "Consumption"
         value = int(mtu_doc["Value"])
         ap_power = int(mtu_doc["KVA"])
         power_factor = int(mtu_doc["PF"]) / 10
         voltage = int(mtu_doc["Voltage"]) / 10
-        return MtuConsumption(value, ap_power, power_factor, voltage)
+        return MtuNet(type, value, ap_power, power_factor, voltage)
 
     def spyder_ctgroup_consumption(self, spyder, ctgroup):
         """Return consumption information for a spyder ctgroup."""
