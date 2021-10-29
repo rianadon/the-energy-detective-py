@@ -113,18 +113,17 @@ class TED6000(TED):
             "Configuration"
         ]
 
-        for mtu_doc in mtu_settings:
-            if(len(self.mtus) < self.num_mtus):
-                mtu_number = int(mtu_doc["MTUNumber"])
-                mtu = TedMtu(
-                    mtu_doc["MTUID"],
-                    mtu_number,
-                    mtu_doc["MTUDescription"],
-                    TED6000.MtuType(int(config_settings["MTUType%d" % mtu_number])),
-                    int(mtu_doc["PowerCalibrationFactor"]) / 10,
-                    int(mtu_doc["VoltageCalibrationFactor"]) / 10,
-                )
-                self.mtus.append(mtu)
+        for mtu_doc in mtu_settings[0:self.num_mtus]:
+            mtu_number = int(mtu_doc["MTUNumber"])
+            mtu = TedMtu(
+                mtu_doc["MTUID"],
+                mtu_number,
+                mtu_doc["MTUDescription"],
+                TED6000.MtuType(int(config_settings["MTUType%d" % mtu_number])),
+                int(mtu_doc["PowerCalibrationFactor"]) / 10,
+                int(mtu_doc["VoltageCalibrationFactor"]) / 10,
+            )
+            self.mtus.append(mtu)
 
     def _parse_spyders(self):
         """Fill the list of Spyders with Spyders parsed from the xml data."""
