@@ -2,16 +2,21 @@ import asyncio
 
 from . import createTED
 
+
+async def run() -> None:
+    reader = await createTED(HOST)
+    await reader.update()
+    reader.print_to_console()
+
+
 if __name__ == "__main__":
     HOST = input("Enter the TED meter address or host name: ")
 
     print("Reading...")
     loop = asyncio.get_event_loop()
-    TESTREADER = loop.run_until_complete(createTED(HOST))
-
     data_results = loop.run_until_complete(
-        asyncio.gather(TESTREADER.update(), return_exceptions=True)
+        asyncio.gather(run(), return_exceptions=True)
     )
-    print("Errors:", data_results)
 
-    TESTREADER.print_to_console()
+    print()
+    print("Errors:", data_results)
