@@ -1,12 +1,11 @@
 """Base class for TED energy meters."""
 import logging
-from dataclasses import dataclass
-from enum import Enum
-from typing import Any, List, NamedTuple
+from typing import Any, List
 
 import httpx
 import xmltodict
 
+from .dataclasses import Consumption, MtuNet, TedCtGroup, TedMtu, TedSpyder
 from .formatting import (
     format_consumption,
     format_ct,
@@ -16,74 +15,6 @@ from .formatting import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class MtuType(Enum):
-    """TED Defined MTU configuration types."""
-
-    NET = 0
-    LOAD = 1
-    GENERATION = 2
-    STAND_ALONE = 3
-
-
-@dataclass
-class TedMtu:
-    """MTU panel for the energy meter."""
-
-    id: str
-    position: int
-    description: str
-    type: MtuType
-    power_cal_factor: float
-    voltage_cal_factor: float
-
-
-@dataclass
-class TedCt:
-    """Individual reading on a Spyder."""
-
-    position: int
-    description: str
-    type: int
-    multiplier: int
-
-
-@dataclass
-class TedCtGroup:
-    """Group of readings on a Spyder."""
-
-    position: int
-    description: str
-    member_cts: List[TedCt]
-
-
-@dataclass
-class TedSpyder:
-    """Spyder unit for the energy meter."""
-
-    position: int
-    secondary: int
-    mtu_parent: str
-    ctgroups: List[TedCtGroup]
-
-
-class Consumption(NamedTuple):
-    """Consumption for both totals and per Spyder."""
-
-    now: int
-    daily: int
-    mtd: int
-
-
-class MtuNet(NamedTuple):
-    """Consumption or Production for an MTU."""
-
-    type: MtuType
-    now: int
-    apparent_power: int
-    power_factor: float
-    voltage: float
 
 
 class TED:

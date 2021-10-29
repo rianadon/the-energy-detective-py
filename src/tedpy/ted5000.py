@@ -1,9 +1,11 @@
+"""Implementation for the TED5000 meter."""
 import asyncio
 from typing import Any
 
 import httpx
 
-from .ted import TED, Consumption, MtuNet, MtuType, TedMtu
+from .dataclasses import Consumption, MtuNet, MtuType, TedMtu
+from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
 ENDPOINT_URL_DATA = "http://{}/api/LiveData.xml"

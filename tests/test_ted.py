@@ -5,7 +5,7 @@ import respx
 from httpx import Response
 
 from tedpy import createTED
-from tedpy.ted import MtuType
+from tedpy.dataclasses import MtuType
 
 
 def _fixtures_dir() -> Path:
