@@ -48,11 +48,6 @@ class TED6000(TED):
         ]
 
     @property
-    def num_mtus(self):
-        """Return the number of MTUs."""
-        return int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
-
-    @property
     def polling_delay(self):
         """Return the delay between successive polls of MTU data."""
         return self.endpoint_settings_results["SystemSettings"]["MTUPollingDelay"]
@@ -95,12 +90,13 @@ class TED6000(TED):
     def _parse_mtus(self):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
         self.mtus = []
+
+        num_mtus = int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
         mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
         config_settings = self.endpoint_settings_results["SystemSettings"][
             "Configuration"
         ]
-
-        for mtu_doc in mtu_settings[0:self.num_mtus]:
+        for mtu_doc in mtu_settings[0:num_mtus]:
             mtu_number = int(mtu_doc["MTUNumber"])
             mtu = TedMtu(
                 mtu_doc["MTUID"],

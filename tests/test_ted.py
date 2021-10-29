@@ -40,7 +40,6 @@ async def test_ted_5000():
     assert reader.total_consumption().daily == 38553
     assert reader.total_consumption().mtd == 277266
 
-    assert reader.num_mtus == 4
     assert len(reader.mtus) == 4
     assert reader.mtus[0].id == '109CE0'
     assert reader.mtus[0].description == 'Pan 1'
@@ -101,7 +100,6 @@ async def test_ted_6000():
     assert reader.total_consumption().daily == 35684
     assert reader.total_consumption().mtd == 943962
 
-    assert reader.num_mtus == 3
     assert len(reader.mtus) == 3
     assert reader.mtus[0].id == '10028B'
     assert reader.mtus[0].description == 'Panel1'

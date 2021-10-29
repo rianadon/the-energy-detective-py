@@ -40,11 +40,6 @@ class TED5000(TED):
             "GatewayDescription"
         ]
 
-    @property
-    def num_mtus(self):
-        """Return the number of MTUs."""
-        return int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
-
     def total_consumption(self):
         """Return consumption information for the whole system."""
         data = self.endpoint_data_results["LiveData"]
@@ -78,9 +73,10 @@ class TED5000(TED):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
         self.mtus = []
 
+        num_mtus = int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
         mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
         solar_settings = self.endpoint_settings_results["SystemSettings"]["Solar"]
-        for mtu_doc in mtu_settings[0:self.num_mtus]:
+        for mtu_doc in mtu_settings[0:num_mtus]:
                 mtu_id = mtu_doc["MTUID"]
                 mtu_number = int(mtu_doc["MTUNumber"])
                 mtu = TedMtu(
