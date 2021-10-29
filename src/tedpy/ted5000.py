@@ -80,8 +80,7 @@ class TED5000(TED):
 
         mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
         solar_settings = self.endpoint_settings_results["SystemSettings"]["Solar"]
-        for mtu_doc in mtu_settings:
-            if(len(self.mtus) < self.num_mtus):
+        for mtu_doc in mtu_settings[0:self.num_mtus]:
                 mtu_id = mtu_doc["MTUID"]
                 mtu_number = int(mtu_doc["MTUNumber"])
                 mtu = TedMtu(
