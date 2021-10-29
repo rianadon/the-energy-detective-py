@@ -35,5 +35,8 @@ jobs:
     - name: Check Formatting
       run: poetry run black . --check
 
+    - name: Check Import Sorting
+      run: poetry run isort . --check
+
     - name: Run Tests
       run: poetry run pytest .
