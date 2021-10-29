@@ -1,6 +1,4 @@
 """Module to read energy consumption from a TED energy meter."""
-from typing import List
-
 import httpx
 
 from .ted import TED

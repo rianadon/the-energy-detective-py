@@ -1,6 +1,7 @@
 """Base class for TED energy meters."""
 import logging
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, List, NamedTuple
 
 import httpx
@@ -17,6 +18,15 @@ from .formatting import (
 _LOGGER = logging.getLogger(__name__)
 
 
+class MtuType(Enum):
+    """TED Defined MTU configuration types."""
+
+    NET = 0
+    LOAD = 1
+    GENERATION = 2
+    STAND_ALONE = 3
+
+
 @dataclass
 class TedMtu:
     """MTU panel for the energy meter."""
@@ -24,7 +34,7 @@ class TedMtu:
     id: str
     position: int
     description: str
-    type: int
+    type: MtuType
     power_cal_factor: float
     voltage_cal_factor: float
 
@@ -66,10 +76,11 @@ class Consumption(NamedTuple):
     mtd: int
 
 
-class MtuConsumption(NamedTuple):
-    """Consumption for an MTU."""
+class MtuNet(NamedTuple):
+    """Consumption or Production for an MTU."""
 
-    current_usage: int
+    type: MtuType
+    now: int
     apparent_power: int
     power_factor: float
     voltage: float
@@ -104,12 +115,17 @@ class TED:
         """Return the id / serial number for the gateway."""
         return "ted"
 
+    @property
+    def gateway_description(self) -> str:
+        """Return the description for the gateway."""
+        return ""
+
     def total_consumption(self) -> Consumption:
         """Return consumption information for the whole system."""
         raise NotImplementedError()
 
-    def mtu_consumption(self, mtu: TedMtu) -> MtuConsumption:
-        """Return consumption information for a MTU."""
+    def mtu_value(self, mtu: TedMtu) -> MtuNet:
+        """Return consumption or production information for a MTU based on type."""
         raise NotImplementedError()
 
     def spyder_ctgroup_consumption(
@@ -118,7 +134,7 @@ class TED:
         """Return consumption information for a spyder ctgroup."""
         raise NotImplementedError()
 
-    async def _check_endpooint(self, url: str) -> bool:
+    async def _check_endpoint(self, url: str) -> bool:
         formatted_url = url.format(self.host)
         response = await self._async_fetch_with_retry(formatted_url)
         return response.status_code < 300
@@ -152,7 +168,7 @@ class TED:
         print("MTUs:")
         for m in self.mtus:
             print("  " + format_mtu(m))
-            print("    Consumption:", self.mtu_consumption(m))
+            print("    Net:", self.mtu_value(m))
         print()
         print("Spyders:")
         for s in self.spyders:
