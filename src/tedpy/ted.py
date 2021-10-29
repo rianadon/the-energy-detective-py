@@ -1,5 +1,6 @@
 """Base class for TED energy meters."""
 import asyncio
+from enum import Enum
 import logging
 import xmltodict
 from collections import namedtuple
@@ -25,6 +26,13 @@ MtuNet = namedtuple(
 
 class TED:
     """Instance of TED"""
+
+    class MtuType(Enum):
+        """TED Defined MTU configuration types"""
+        NET = 0
+        LOAD = 1
+        GENERATION = 2
+        STAND_ALONE = 3
 
     def __init__(self, host, async_client=None):
         """Init the TED."""

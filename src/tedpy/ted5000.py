@@ -1,7 +1,5 @@
 import asyncio
 
-from enum import Enum
-
 from .ted import *
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
@@ -10,13 +8,6 @@ ENDPOINT_URL_DATA = "http://{}/api/LiveData.xml"
 
 class TED5000(TED):
     """Instance of TED5000"""
-
-    class SolarConfigs(Enum):
-        """TED5000 Defined Solar MTU Types"""
-        LOAD = 0
-        GENERATION = 1
-        ADJ_LOAD = 2
-        STAND_ALONE = 3
 
     def __init__(self, host, async_client=None):
         super().__init__(host, async_client)
@@ -65,7 +56,7 @@ class TED5000(TED):
     def mtu_value(self, mtu):
         """Return consumption or production information for a MTU based on type."""
         data = self.endpoint_data_results["LiveData"]
-        type = "Production" if(mtu.type == TED5000.SolarConfigs.GENERATION) else "Consumption"
+        type = mtu.type
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
         ap_power = int(data["Power"]["MTU%d" % mtu.position]["KVA"])
         power_factor = 0
@@ -73,6 +64,15 @@ class TED5000(TED):
             power_factor = round(((power_now / ap_power) * 100), 1)
         voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"]) / 10
         return MtuNet(type, power_now, ap_power, power_factor, voltage)
+
+    def _parse_mtu_type(self, mtu_type):
+        switcher = {
+            0: TED.MtuType.NET,
+            1: TED.MtuType.GENERATION,
+            2: TED.MtuType.LOAD,
+            3: TED.MtuType.STAND_ALONE
+        }
+        return switcher.get(mtu_type, TED.MtuType.STAND_ALONE)
 
     def _parse_mtus(self):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
@@ -87,7 +87,7 @@ class TED5000(TED):
                     mtu_id,
                     mtu_number,
                     mtu_doc["MTUDescription"],
-                    TED5000.SolarConfigs(int(solar_settings["SolarConfig%d" % mtu_number])),
+                    self._parse_mtu_type(int(solar_settings["SolarConfig%d" % mtu_number])),
                     int(mtu_doc["PowerCalibrationFactor"]),
                     int(mtu_doc["VoltageCalibrationFactor"]),
                 )

@@ -5,6 +5,7 @@ import respx
 from httpx import Response
 
 from tedpy import createTED
+from tedpy.ted import TED
 from tedpy.ted5000 import TED5000
 from tedpy.ted6000 import TED6000
 
@@ -43,22 +44,22 @@ async def test_ted_5000():
     assert len(reader.mtus) == 4
     assert reader.mtus[0].id == '109CE0'
     assert reader.mtus[0].description == 'Pan 1'
-    assert reader.mtus[0].type == TED5000.SolarConfigs.LOAD
+    assert reader.mtus[0].type == TED.MtuType.NET
     assert reader.mtus[0].power_cal_factor == 100
     assert reader.mtus[0].voltage_cal_factor == 100
     assert reader.mtus[1].id == '109CAD'
     assert reader.mtus[1].description == 'Pan 2'
-    assert reader.mtus[1].type == TED5000.SolarConfigs.LOAD
+    assert reader.mtus[1].type == TED.MtuType.NET
     assert reader.mtus[1].power_cal_factor == 100
     assert reader.mtus[1].voltage_cal_factor == 100
     assert reader.mtus[2].id == '109D3A'
     assert reader.mtus[2].description == 'AC DN'
-    assert reader.mtus[2].type == TED5000.SolarConfigs.STAND_ALONE
+    assert reader.mtus[2].type == TED.MtuType.STAND_ALONE
     assert reader.mtus[2].power_cal_factor == 100
     assert reader.mtus[2].voltage_cal_factor == 100
     assert reader.mtus[3].id == '109E8B'
     assert reader.mtus[3].description == 'AC UP'
-    assert reader.mtus[3].type == TED5000.SolarConfigs.STAND_ALONE
+    assert reader.mtus[3].type == TED.MtuType.STAND_ALONE
     assert reader.mtus[3].power_cal_factor == 100
     assert reader.mtus[3].voltage_cal_factor == 100
 
@@ -104,17 +105,17 @@ async def test_ted_6000():
     assert len(reader.mtus) == 3
     assert reader.mtus[0].id == '10028B'
     assert reader.mtus[0].description == 'Panel1'
-    assert reader.mtus[0].type == TED6000.MtuType.NET
+    assert reader.mtus[0].type == TED.MtuType.NET
     assert reader.mtus[0].power_cal_factor == 100.0
     assert reader.mtus[0].voltage_cal_factor == 100.0
     assert reader.mtus[1].id == '17061A'
     assert reader.mtus[1].description == 'Subpanel'
-    assert reader.mtus[1].type == TED6000.MtuType.STAND_ALONE
+    assert reader.mtus[1].type == TED.MtuType.STAND_ALONE
     assert reader.mtus[1].power_cal_factor == 104.0
     assert reader.mtus[1].voltage_cal_factor == 100.0
     assert reader.mtus[2].id == '00013A'
     assert reader.mtus[2].description == 'Solar'
-    assert reader.mtus[2].type == TED6000.MtuType.GENERATION
+    assert reader.mtus[2].type == TED.MtuType.GENERATION
     assert reader.mtus[2].power_cal_factor == 100.0
     assert reader.mtus[2].voltage_cal_factor == 100.0
     
