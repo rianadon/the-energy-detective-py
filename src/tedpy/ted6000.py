@@ -33,7 +33,7 @@ class TED6000(TED):
 
     async def check(self):
         """Check if the required endpoint are accessible."""
-        return await self._check_endpooint(ENDPOINT_URL_SETTINGS)
+        return await self._check_endpoint(ENDPOINT_URL_SETTINGS)
 
     @property
     def gateway_id(self):
@@ -48,18 +48,6 @@ class TED6000(TED):
         ]
 
     @property
-    def system_type(self):
-        """Return the system type, represented by a number."""
-        return self.endpoint_settings_results["SystemSettings"]["Configuration"][
-            "SystemType"
-        ]
-
-    @property
-    def num_mtus(self):
-        """Return the number of MTUs."""
-        return self.endpoint_settings_results["SystemSettings"]["NumberMTU"]
-
-    @property
     def polling_delay(self):
         """Return the delay between successive polls of MTU data."""
         return self.endpoint_settings_results["SystemSettings"]["MTUPollingDelay"]
@@ -69,16 +57,17 @@ class TED6000(TED):
         data = self.endpoint_dashboard_results["DashData"]
         return Consumption(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
-    def mtu_consumption(self, mtu):
-        """Return consumption information for a MTU."""
+    def mtu_value(self, mtu):
+        """Return consumption or production information for a MTU based on type."""
         mtu_doc = self.endpoint_mtu_results["DialDataDetail"]["MTUVal"][
             "MTU%d" % mtu.position
         ]
+        type = mtu.type
         value = int(mtu_doc["Value"])
         ap_power = int(mtu_doc["KVA"])
-        power_factor = int(mtu_doc["PF"])
+        power_factor = int(mtu_doc["PF"]) / 10
         voltage = int(mtu_doc["Voltage"]) / 10
-        return MtuConsumption(value, ap_power, power_factor, voltage)
+        return MtuNet(type, value, ap_power, power_factor, voltage)
 
     def spyder_ctgroup_consumption(self, spyder, ctgroup):
         """Return consumption information for a spyder ctgroup."""
@@ -89,27 +78,35 @@ class TED6000(TED):
             int(group_doc["Now"]), int(group_doc["TDY"]), int(group_doc["MTD"])
         )
 
+    def _parse_mtu_type(self, mtu_type):
+        switcher = {
+            0: TED.MtuType.NET,
+            1: TED.MtuType.LOAD,
+            2: TED.MtuType.GENERATION,
+            3: TED.MtuType.STAND_ALONE
+        }
+        return switcher.get(mtu_type, TED.MtuType.STAND_ALONE)
+
     def _parse_mtus(self):
         """Fill the list of MTUs with MTUs parsed from the xml data."""
         self.mtus = []
+
+        num_mtus = int(self.endpoint_settings_results["SystemSettings"]["NumberMTU"])
         mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
         config_settings = self.endpoint_settings_results["SystemSettings"][
             "Configuration"
         ]
-
-        for mtu_doc in mtu_settings:
-            mtu_id = mtu_doc["MTUID"]
+        for mtu_doc in mtu_settings[0:num_mtus]:
             mtu_number = int(mtu_doc["MTUNumber"])
-            if mtu_id != "000000":
-                mtu = TedMtu(
-                    mtu_id,
-                    mtu_number,
-                    mtu_doc["MTUDescription"],
-                    config_settings["MTUType%d" % mtu_number],
-                    int(mtu_doc["PowerCalibrationFactor"]),
-                    int(mtu_doc["VoltageCalibrationFactor"]),
-                )
-                self.mtus.append(mtu)
+            mtu = TedMtu(
+                mtu_doc["MTUID"],
+                mtu_number,
+                mtu_doc["MTUDescription"],
+                self._parse_mtu_type(int(config_settings["MTUType%d" % mtu_number])),
+                int(mtu_doc["PowerCalibrationFactor"]) / 10,
+                int(mtu_doc["VoltageCalibrationFactor"]) / 10,
+            )
+            self.mtus.append(mtu)
 
     def _parse_spyders(self):
         """Fill the list of Spyders with Spyders parsed from the xml data."""

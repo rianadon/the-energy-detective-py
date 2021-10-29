@@ -14,10 +14,10 @@
 	<WxLat>0</WxLat>
 	<WxLon>0</WxLon>
 	<Configuration>
-		<SystemType>0</SystemType>
+		<SystemType>1</SystemType>
 		<MTUType1>0</MTUType1>
-		<MTUType2>0</MTUType2>
-		<MTUType3>0</MTUType3>
+		<MTUType2>3</MTUType2>
+		<MTUType3>2</MTUType3>
 		<MTUType4>0</MTUType4>
 	</Configuration>
 	<USNAP>
@@ -28,7 +28,7 @@
 	<MTUs>
 		<MTU>
 			<MTUNumber>1</MTUNumber>
-			<MTUID>1234</MTUID>
+			<MTUID>10028B</MTUID>
 			<MTUDescription>Panel1</MTUDescription>
 			<PowerCalibrationFactor>1000</PowerCalibrationFactor>
 			<VoltageCalibrationFactor>1000</VoltageCalibrationFactor>
@@ -37,16 +37,16 @@
 		</MTU>
 		<MTU>
 			<MTUNumber>2</MTUNumber>
-			<MTUID>2345</MTUID>
-			<MTUDescription>Panel2</MTUDescription>
-			<PowerCalibrationFactor>1000</PowerCalibrationFactor>
+			<MTUID>17061A</MTUID>
+			<MTUDescription>Subpanel</MTUDescription>
+			<PowerCalibrationFactor>1040</PowerCalibrationFactor>
 			<VoltageCalibrationFactor>1000</VoltageCalibrationFactor>
 			<UseTCP>0</UseTCP>
 			<MTUIP>0.0.0.0</MTUIP>
 		</MTU>
 		<MTU>
 			<MTUNumber>3</MTUNumber>
-			<MTUID>3456</MTUID>
+			<MTUID>00013A</MTUID>
 			<MTUDescription>Solar</MTUDescription>
 			<PowerCalibrationFactor>1000</PowerCalibrationFactor>
 			<VoltageCalibrationFactor>1000</VoltageCalibrationFactor>

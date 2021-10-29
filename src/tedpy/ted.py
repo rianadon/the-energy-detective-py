@@ -1,5 +1,6 @@
 """Base class for TED energy meters."""
 import asyncio
+from enum import Enum
 import logging
 import xmltodict
 from collections import namedtuple
@@ -18,13 +19,20 @@ TedCt = namedtuple("TedCt", ["position", "description", "type", "multiplier"])
 TedCtGroup = namedtuple("TedCtGroup", ["position", "description", "member_cts"])
 
 Consumption = namedtuple("Consumption", ["now", "daily", "mtd"])
-MtuConsumption = namedtuple(
-    "MtuConsumption", ["current_usage", "apparent_power", "power_factor", "voltage"]
+MtuNet = namedtuple(
+    "MtuNet", ["type", "now", "apparent_power", "power_factor", "voltage"]
 )
 
 
 class TED:
     """Instance of TED"""
+
+    class MtuType(Enum):
+        """TED Defined MTU configuration types"""
+        NET = 0
+        LOAD = 1
+        GENERATION = 2
+        STAND_ALONE = 3
 
     def __init__(self, host, async_client=None):
         """Init the TED."""
@@ -52,19 +60,24 @@ class TED:
         """Return the id / serial number for the gateway."""
         return "ted"
 
+    @property
+    def gateway_description(self):
+        """Return the description for the gateway."""
+        return ""
+
     def total_consumption(self):
         """Return consumption information for the whole system."""
         raise NotImplementedError()
 
-    def mtu_consumption(self, mtu):
-        """Return consumption information for a MTU."""
+    def mtu_value(self, mtu):
+        """Return consumption or production information for a MTU based on type."""
         raise NotImplementedError()
 
     def spyder_ctgroup_consumption(self, spyder, ctgroup):
         """Return consumption information for a spyder ctgroup."""
         raise NotImplementedError()
 
-    async def _check_endpooint(self, url):
+    async def _check_endpoint(self, url):
         formatted_url = url.format(self.host)
         response = await self._async_fetch_with_retry(formatted_url)
         return response.status_code < 300
@@ -98,7 +111,7 @@ class TED:
         print("MTUs:")
         for m in self.mtus:
             print("  " + format_mtu(m))
-            print("    Consumption:", self.mtu_consumption(m))
+            print("    Net:", self.mtu_value(m))
         print()
         print("Spyders:")
         for s in self.spyders:
