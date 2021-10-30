@@ -65,13 +65,13 @@ class TED:
         """Return consumption information for a spyder ctgroup."""
         raise NotImplementedError()
 
-    async def _check_endpoint(self, url: str) -> bool:
-        formatted_url = url.format(self.host)
+    async def _check_endpoint(self, url: str, params: str = None) -> bool:
+        formatted_url = url.format(self.host, params)
         response = await self._async_fetch_with_retry(formatted_url)
         return response.status_code < 300
 
-    async def _update_endpoint(self, attr: str, url: str) -> None:
-        formatted_url = url.format(self.host)
+    async def _update_endpoint(self, attr: str, url: str, params: str = None) -> None:
+        formatted_url = url.format(self.host, params)
         response = await self._async_fetch_with_retry(formatted_url)
         try:
             setattr(self, attr, xmltodict.parse(response.text))

@@ -17,6 +17,7 @@ from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
 ENDPOINT_URL_DASHBOARD = "http://{}/api/DashData.xml?T=0&D=0&M=0"
+ENDPOINT_URL_MTUDASHBOARD = "http://{}/api/DashData.xml?T=0&D=255&M={}"
 ENDPOINT_URL_MTU = "http://{}/api/SystemOverview.xml?T=0&D=0&M=0"
 ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
 
@@ -29,19 +30,31 @@ class TED6000(TED):
 
         self.endpoint_settings_results: Any = None
         self.endpoint_dashboard_results: Any = None
+        self.endpoint_mtu1_dashboard_results: Any = None
+        self.endpoint_mtu2_dashboard_results: Any = None
+        self.endpoint_mtu3_dashboard_results: Any = None
+        self.endpoint_mtu4_dashboard_results: Any = None
         self.endpoint_mtu_results: Any = None
         self.endpoint_spyder_results: Any = None
 
     async def update(self) -> None:
-        """Fetch data from the endpoints."""
+        """Fetch settings data from the endpoints."""
         await asyncio.gather(
             self._update_endpoint("endpoint_settings_results", ENDPOINT_URL_SETTINGS),
-            self._update_endpoint("endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD),
-            self._update_endpoint("endpoint_mtu_results", ENDPOINT_URL_MTU),
-            self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
         )
 
         self._parse_mtus()
+
+        """Fetch MTU/Spyder data results"""
+        await asyncio.gather(
+            self._update_endpoint("endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD),
+            self._update_endpoint("endpoint_mtu_results", ENDPOINT_URL_MTU),
+            self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
+            *map(lambda mtu: self._update_endpoint(
+                "endpoint_mtu%d_dashboard_results" % mtu.position, 
+                ENDPOINT_URL_MTUDASHBOARD, str(mtu.position)), self.mtus)
+        )
+
         self._parse_spyders()
 
     async def check(self) -> bool:
@@ -76,11 +89,14 @@ class TED6000(TED):
             "MTU%d" % mtu.position
         ]
         type = mtu.type
-        value = int(mtu_doc["Value"])
+        dashdata = getattr(self, "endpoint_mtu%d_dashboard_results" % mtu.position)["DashData"]
+        now = int(dashdata["Now"])
+        tdy = int(dashdata["TDY"])
+        mtd = int(dashdata["MTD"])
         ap_power = int(mtu_doc["KVA"])
         power_factor = int(mtu_doc["PF"]) / 10
         voltage = int(mtu_doc["Voltage"]) / 10
-        return MtuNet(type, value, ap_power, power_factor, voltage)
+        return MtuNet(type, now, tdy, mtd, ap_power, power_factor, voltage)
 
     def spyder_ctgroup_consumption(
         self, spyder: TedSpyder, ctgroup: TedCtGroup

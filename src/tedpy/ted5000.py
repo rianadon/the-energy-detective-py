@@ -59,12 +59,16 @@ class TED5000(TED):
         data = self.endpoint_data_results["LiveData"]
         type = mtu.type
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
+        power_tdy = int(data["Power"]["MTU%d" % mtu.position]["PowerTDY"])
+        power_mtd = int(data["Power"]["MTU%d" % mtu.position]["PowerMTD"])
         ap_power = int(data["Power"]["MTU%d" % mtu.position]["KVA"])
         power_factor = 0.0
         if ap_power != 0:
             power_factor = round(((power_now / ap_power) * 100), 1)
         voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"]) / 10
-        return MtuNet(type, power_now, ap_power, power_factor, voltage)
+        return MtuNet(type, power_now, power_tdy, power_mtd, ap_power, power_factor,
+            voltage
+        )
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
         switcher = {
