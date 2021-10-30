@@ -74,7 +74,12 @@ class TED:
         formatted_url = url.format(self.host, params)
         response = await self._async_fetch_with_retry(formatted_url)
         try:
-            setattr(self, attr, xmltodict.parse(response.text))
+            if params is None:
+                # write to self[attr]
+                setattr(self, attr, xmltodict.parse(response.text))
+            else:
+                # write to self[attr][param]; assume self[attr] was initialized to dict()
+                getattr(self, attr)[params] = xmltodict.parse(response.text)
         except xmltodict.expat.ExpatError:
             raise
 

@@ -1,6 +1,6 @@
 """Implementation for the TED6000 meter."""
 import asyncio
-from typing import Any
+from typing import Any, Dict
 
 import httpx
 
@@ -29,13 +29,9 @@ class TED6000(TED):
         super().__init__(host, async_client)
 
         self.endpoint_settings_results: Any = None
-        self.endpoint_dashboard_results: Any = None
-        self.endpoint_mtu1_dashboard_results: Any = None
-        self.endpoint_mtu2_dashboard_results: Any = None
-        self.endpoint_mtu3_dashboard_results: Any = None
-        self.endpoint_mtu4_dashboard_results: Any = None
         self.endpoint_mtu_results: Any = None
         self.endpoint_spyder_results: Any = None
+        self.endpoint_dashboard_results: Dict[int, Any] = dict()
 
     async def update(self) -> None:
         """Fetch settings and power data from the endpoints."""
@@ -48,11 +44,10 @@ class TED6000(TED):
 
         """Fetch MTU/Spyder data results"""
         await asyncio.gather(
-            self._update_endpoint("endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD),
             self._update_endpoint("endpoint_mtu_results", ENDPOINT_URL_MTU),
             self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
-            *map(lambda mtu: self._update_endpoint(
-                "endpoint_mtu%d_dashboard_results" % mtu.position, 
+            self._update_endpoint("endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, "0"),
+            *map(lambda mtu: self._update_endpoint("endpoint_dashboard_results", 
                 ENDPOINT_URL_MTUDASHBOARD, str(mtu.position)), self.mtus)
         )
 
@@ -79,7 +74,7 @@ class TED6000(TED):
 
     def total_consumption(self) -> Consumption:
         """Return consumption information for the whole system."""
-        data = self.endpoint_dashboard_results["DashData"]
+        data = self.endpoint_dashboard_results["0"]["DashData"]
         return Consumption(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     def mtu_value(self, mtu: TedMtu) -> MtuNet:
@@ -88,7 +83,7 @@ class TED6000(TED):
             "MTU%d" % mtu.position
         ]
         type = mtu.type
-        dashdata = getattr(self, "endpoint_mtu%d_dashboard_results" % mtu.position)["DashData"]
+        dashdata = self.endpoint_dashboard_results[str(mtu.position)]["DashData"]
         now = int(dashdata["Now"])
         tdy = int(dashdata["TDY"])
         mtd = int(dashdata["MTD"])
