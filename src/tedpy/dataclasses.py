@@ -67,7 +67,7 @@ class MtuNet(NamedTuple):
 
     type: MtuType
     now: int
-    tdy: int
+    daily: int
     mtd: int
     apparent_power: int
     power_factor: float

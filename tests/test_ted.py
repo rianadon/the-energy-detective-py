@@ -61,25 +61,25 @@ async def test_ted_5000() -> None:
     assert reader.mtus[3].voltage_cal_factor == 100
 
     assert reader.mtu_value(reader.mtus[0]).now == 5840
-    assert reader.mtu_value(reader.mtus[0]).tdy == 28611
+    assert reader.mtu_value(reader.mtus[0]).daily == 28611
     assert reader.mtu_value(reader.mtus[0]).mtd == 227562
     assert reader.mtu_value(reader.mtus[0]).apparent_power == 6062
     assert reader.mtu_value(reader.mtus[0]).power_factor == 96.3
     assert reader.mtu_value(reader.mtus[0]).voltage == 119.7
     assert reader.mtu_value(reader.mtus[1]).now == 438
-    assert reader.mtu_value(reader.mtus[1]).tdy == 1845
+    assert reader.mtu_value(reader.mtus[1]).daily == 1845
     assert reader.mtu_value(reader.mtus[1]).mtd == 9688
     assert reader.mtu_value(reader.mtus[1]).apparent_power == 462
     assert reader.mtu_value(reader.mtus[1]).power_factor == 94.8
     assert reader.mtu_value(reader.mtus[1]).voltage == 119.6
     assert reader.mtu_value(reader.mtus[2]).now == 3354
-    assert reader.mtu_value(reader.mtus[2]).tdy == 8097
+    assert reader.mtu_value(reader.mtus[2]).daily == 8097
     assert reader.mtu_value(reader.mtus[2]).mtd == 40016
     assert reader.mtu_value(reader.mtus[2]).apparent_power == 3680
     assert reader.mtu_value(reader.mtus[2]).power_factor == 91.1
     assert reader.mtu_value(reader.mtus[2]).voltage == 118.9
     assert reader.mtu_value(reader.mtus[3]).now == 0
-    assert reader.mtu_value(reader.mtus[3]).tdy == 0
+    assert reader.mtu_value(reader.mtus[3]).daily == 0
     assert reader.mtu_value(reader.mtus[3]).mtd == 0
     assert reader.mtu_value(reader.mtus[3]).apparent_power == 0
     assert reader.mtu_value(reader.mtus[3]).power_factor == 0
@@ -137,19 +137,19 @@ async def test_ted_6000() -> None:
     assert reader.mtus[2].voltage_cal_factor == 100.0
 
     assert reader.mtu_value(reader.mtus[0]).now == 1591
-    assert reader.mtu_value(reader.mtus[0]).tdy == 22846
+    assert reader.mtu_value(reader.mtus[0]).daily == 22846
     assert reader.mtu_value(reader.mtus[0]).mtd == 705341
     assert reader.mtu_value(reader.mtus[0]).apparent_power == 3344
     assert reader.mtu_value(reader.mtus[0]).power_factor == 97.3
     assert reader.mtu_value(reader.mtus[0]).voltage == 123
     assert reader.mtu_value(reader.mtus[1]).now == 5840
-    assert reader.mtu_value(reader.mtus[1]).tdy == 28611
+    assert reader.mtu_value(reader.mtus[1]).daily == 28611
     assert reader.mtu_value(reader.mtus[1]).mtd == 227562
     assert reader.mtu_value(reader.mtus[1]).apparent_power == 52
     assert reader.mtu_value(reader.mtus[1]).power_factor == 80.7
     assert reader.mtu_value(reader.mtus[1]).voltage == 123
     assert reader.mtu_value(reader.mtus[2]).now == -438
-    assert reader.mtu_value(reader.mtus[2]).tdy == -1845
+    assert reader.mtu_value(reader.mtus[2]).daily == -1845
     assert reader.mtu_value(reader.mtus[2]).mtd == -9688
     assert reader.mtu_value(reader.mtus[2]).apparent_power == 0
     assert reader.mtu_value(reader.mtus[2]).power_factor == 0
