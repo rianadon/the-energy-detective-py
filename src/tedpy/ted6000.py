@@ -44,6 +44,7 @@ class TED6000(TED):
         )
 
         self._parse_mtus()
+        self._parse_spyders()
 
         """Fetch MTU/Spyder data results"""
         await asyncio.gather(
@@ -54,8 +55,6 @@ class TED6000(TED):
                 "endpoint_mtu%d_dashboard_results" % mtu.position, 
                 ENDPOINT_URL_MTUDASHBOARD, str(mtu.position)), self.mtus)
         )
-
-        self._parse_spyders()
 
     async def check(self) -> bool:
         """Check if the required endpoint are accessible."""
