@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tedpy"
-version = "0.1.1"
+version = "0.2.0"
 description = "Unofficial library for reading from The Energy Detective power meters"
 authors = ["rianadon"]
 repository = "https://github.com/rianadon/the-energy-detective-py"
