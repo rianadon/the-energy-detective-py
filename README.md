@@ -14,9 +14,12 @@ from tedpy import createTED
 HOST = 'ted6000'
 
 # Use asyncio to deal with the async methods
-reader = await createTED(HOST)
-await reader.update()
-reader.print_to_console()
+try:
+    reader = await createTED(HOST)
+    await reader.update()
+    reader.print_to_console()
+except httpx.HTTPError:
+    # Handle connection errors from createTED and update
 ```
 
 ## Testing
