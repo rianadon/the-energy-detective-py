@@ -38,7 +38,7 @@ class TED6000(TED):
         self.endpoint_spyder_results: Any = None
 
     async def update(self) -> None:
-        """Fetch settings data from the endpoints."""
+        """Fetch settings and power data from the endpoints."""
         await asyncio.gather(
             self._update_endpoint("endpoint_settings_results", ENDPOINT_URL_SETTINGS),
         )
