@@ -27,12 +27,13 @@ class TED6000(TED):
     """Instance of TED6000."""
 
     def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
+        """Init the TED6000."""
         super().__init__(host, async_client)
 
         self.endpoint_settings_results: Any = None
         self.endpoint_mtu_results: Any = None
         self.endpoint_spyder_results: Any = None
-        self.endpoint_dashboard_results: Dict[int, Any] = dict()
+        self.endpoint_dash_results: Dict[int, Any] = dict()
 
     async def update(self) -> None:
         """Fetch settings and power data from the endpoints."""
@@ -43,20 +44,16 @@ class TED6000(TED):
         self._parse_mtus()
         self._parse_spyders()
 
-        """Fetch MTU/Spyder data results"""
+        # Fetch MTU/Spyder data results
         await asyncio.gather(
             self._update_endpoint("endpoint_mtu_results", ENDPOINT_URL_MTU),
             self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
-            self._update_endpoint(
-                "endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, 0
-            ),
-            *map(
-                lambda mtu: self._update_endpoint(
-                    "endpoint_dashboard_results",
-                    ENDPOINT_URL_MTUDASHBOARD,
-                    mtu.position,
-                ),
-                self.mtus,
+            self._update_endpoint("endpoint_dash_results", ENDPOINT_URL_DASHBOARD, 0),
+            *(
+                self._update_endpoint(
+                    "endpoint_dash_results", ENDPOINT_URL_MTUDASHBOARD, mtu.position
+                )
+                for mtu in self.mtus
             )
         )
 
@@ -83,18 +80,17 @@ class TED6000(TED):
 
     def energy(self) -> EnergyYield:
         """Return energy yield information for the whole system."""
-        data = self.endpoint_dashboard_results[0]["DashData"]
+        data = self.endpoint_dash_results[0]["DashData"]
         return EnergyYield(
             YieldType.SYSTEM_NET, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
         )
 
     def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
         """Return consumption or production information for a MTU."""
-        dashdata = self.endpoint_dashboard_results[mtu.position]["DashData"]
-        power_now = int(dashdata["Now"])
-        power_tdy = int(dashdata["TDY"])
-        power_mtd = int(dashdata["MTD"])
-        return EnergyYield(YieldType.MTU, power_now, power_tdy, power_mtd)
+        data = self.endpoint_dash_results[mtu.position]["DashData"]
+        return EnergyYield(
+            YieldType.MTU, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
+        )
 
     def _mtu_power(self, mtu: TedMtu) -> Power:
         """Return power information for a MTU."""
@@ -108,14 +104,11 @@ class TED6000(TED):
 
     def _ctgroup_energy(self, ctgroup: TedCtGroup) -> EnergyYield:
         """Return energy yield information for a spyder ctgroup."""
-        group_doc = self.endpoint_spyder_results["SpyderData"]["Spyder"][
+        data = self.endpoint_spyder_results["SpyderData"]["Spyder"][
             ctgroup.spyder_position
         ]["Group"][ctgroup.position]
         return EnergyYield(
-            YieldType.SPYDER_GROUP,
-            int(group_doc["Now"]),
-            int(group_doc["TDY"]),
-            int(group_doc["MTD"]),
+            YieldType.SPYDER_GROUP, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
         )
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
