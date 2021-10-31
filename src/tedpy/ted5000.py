@@ -4,7 +4,7 @@ from typing import Any
 
 import httpx
 
-from .dataclasses import Consumption, MtuNet, MtuType, TedMtu
+from .dataclasses import EnergyYield, MtuType, MtuYield, TedMtu, YieldType
 from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
@@ -46,25 +46,28 @@ class TED5000(TED):
             "GatewayDescription"
         ]
 
-    def total_consumption(self) -> Consumption:
+    def total_consumption(self) -> EnergyYield:
         """Return consumption information for the whole system."""
         data = self.endpoint_data_results["LiveData"]
         power_now = int(data["Power"]["Total"]["PowerNow"])
         power_day = int(data["Power"]["Total"]["PowerTDY"])
         power_mtd = int(data["Power"]["Total"]["PowerMTD"])
-        return Consumption(power_now, power_day, power_mtd)
+        return EnergyYield(YieldType.SYSTEM_NET, power_now, power_day, power_mtd)
 
-    def mtu_value(self, mtu: TedMtu) -> MtuNet:
+    def mtu_value(self, mtu: TedMtu) -> MtuYield:
         """Return consumption or production information for a MTU based on type."""
         data = self.endpoint_data_results["LiveData"]
         type = mtu.type
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
+        power_tdy = int(data["Power"]["MTU%d" % mtu.position]["PowerTDY"])
+        power_mtd = int(data["Power"]["MTU%d" % mtu.position]["PowerMTD"])
+        energyYield = EnergyYield(YieldType.MTU, power_now, power_tdy, power_mtd)
         ap_power = int(data["Power"]["MTU%d" % mtu.position]["KVA"])
         power_factor = 0.0
         if ap_power != 0:
             power_factor = round(((power_now / ap_power) * 100), 1)
         voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"]) / 10
-        return MtuNet(type, power_now, ap_power, power_factor, voltage)
+        return MtuYield(type, energyYield, ap_power, power_factor, voltage)
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
         switcher = {

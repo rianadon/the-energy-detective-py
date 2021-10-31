@@ -4,6 +4,16 @@ from enum import Enum
 from typing import List, NamedTuple
 
 
+class YieldType(Enum):
+    """Represents the different types of system yields."""
+
+    SYSTEM_NET = 0
+    SYSTEM_LOAD = 1
+    SYSTEM_GENERATION = 2
+    MTU = 3
+    SPYDER_GROUP = 4
+
+
 class MtuType(Enum):
     """TED Defined MTU configuration types."""
 
@@ -54,19 +64,20 @@ class TedSpyder:
     ctgroups: List[TedCtGroup]
 
 
-class Consumption(NamedTuple):
-    """Consumption for both totals and per Spyder."""
+class EnergyYield(NamedTuple):
+    """Represents yields from the various system components"""
 
+    type: YieldType
     now: int
     daily: int
     mtd: int
 
 
-class MtuNet(NamedTuple):
+class MtuYield(NamedTuple):
     """Consumption or Production for an MTU."""
 
     type: MtuType
-    now: int
+    energy: EnergyYield
     apparent_power: int
     power_factor: float
     voltage: float
