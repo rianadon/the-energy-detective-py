@@ -66,8 +66,8 @@ class TED5000(TED):
         if ap_power != 0:
             power_factor = round(((power_now / ap_power) * 100), 1)
         voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"]) / 10
-        return MtuNet(type, power_now, power_tdy, power_mtd, ap_power, power_factor,
-            voltage
+        return MtuNet(
+            type, power_now, power_tdy, power_mtd, ap_power, power_factor, voltage
         )
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:

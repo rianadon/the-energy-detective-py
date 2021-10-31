@@ -46,9 +46,17 @@ class TED6000(TED):
         await asyncio.gather(
             self._update_endpoint("endpoint_mtu_results", ENDPOINT_URL_MTU),
             self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
-            self._update_endpoint("endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, "0"),
-            *map(lambda mtu: self._update_endpoint("endpoint_dashboard_results", 
-                ENDPOINT_URL_MTUDASHBOARD, str(mtu.position)), self.mtus)
+            self._update_endpoint(
+                "endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, "0"
+            ),
+            *map(
+                lambda mtu: self._update_endpoint(
+                    "endpoint_dashboard_results",
+                    ENDPOINT_URL_MTUDASHBOARD,
+                    str(mtu.position),
+                ),
+                self.mtus,
+            )
         )
 
     async def check(self) -> bool:

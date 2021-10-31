@@ -85,6 +85,7 @@ async def test_ted_5000() -> None:
     assert reader.mtu_value(reader.mtus[3]).power_factor == 0
     assert reader.mtu_value(reader.mtus[3]).voltage == 0
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_ted_6000() -> None:
