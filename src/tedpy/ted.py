@@ -70,7 +70,7 @@ class TED:
         response = await self._async_fetch_with_retry(formatted_url)
         return response.status_code < 300
 
-    async def _update_endpoint(self, attr: str, url: str, params: str = None) -> None:
+    async def _update_endpoint(self, attr: str, url: str, params: Any = None) -> None:
         formatted_url = url.format(self.host, params)
         response = await self._async_fetch_with_retry(formatted_url)
         try:

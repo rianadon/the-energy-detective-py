@@ -47,13 +47,13 @@ class TED6000(TED):
             self._update_endpoint("endpoint_mtu_results", ENDPOINT_URL_MTU),
             self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
             self._update_endpoint(
-                "endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, "0"
+                "endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, 0
             ),
             *map(
                 lambda mtu: self._update_endpoint(
                     "endpoint_dashboard_results",
                     ENDPOINT_URL_MTUDASHBOARD,
-                    str(mtu.position),
+                    mtu.position,
                 ),
                 self.mtus,
             )
@@ -82,7 +82,7 @@ class TED6000(TED):
 
     def total_consumption(self) -> Consumption:
         """Return consumption information for the whole system."""
-        data = self.endpoint_dashboard_results["0"]["DashData"]
+        data = self.endpoint_dashboard_results[0]["DashData"]
         return Consumption(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     def mtu_value(self, mtu: TedMtu) -> MtuNet:
@@ -91,7 +91,7 @@ class TED6000(TED):
             "MTU%d" % mtu.position
         ]
         type = mtu.type
-        dashdata = self.endpoint_dashboard_results[str(mtu.position)]["DashData"]
+        dashdata = self.endpoint_dashboard_results[mtu.position]["DashData"]
         now = int(dashdata["Now"])
         tdy = int(dashdata["TDY"])
         mtd = int(dashdata["MTD"])
