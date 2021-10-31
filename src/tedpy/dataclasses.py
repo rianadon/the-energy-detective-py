@@ -23,6 +23,14 @@ class MtuType(Enum):
     STAND_ALONE = 3
 
 
+class SystemType(Enum):
+    """Defines the various TED6000 System Types"""
+
+    NET = 0
+    NET_GEN = 1
+    NET_LOAD = 2
+
+
 @dataclass
 class TedMtu:
     """MTU panel for the energy meter."""
