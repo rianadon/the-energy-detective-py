@@ -5,8 +5,7 @@ import respx
 from httpx import Response
 
 from tedpy import createTED
-from tedpy.dataclasses import MtuType, YieldType
-from tedpy.ted6000 import TED6000
+from tedpy.dataclasses import MtuType, SystemType, YieldType
 
 
 def _fixtures_dir() -> Path:
@@ -128,7 +127,7 @@ async def test_ted_6000() -> None:
     reader = await createTED("127.0.0.1")
     await reader.update()
 
-    assert reader.system_type == TED6000.SystemType.NET_GEN
+    assert reader.system_type == SystemType.NET_GEN
 
     assert reader.total_consumption().type == YieldType.SYSTEM_NET
     assert reader.total_consumption().now == 3313

@@ -1,6 +1,5 @@
 """Implementation for the TED6000 meter."""
 import asyncio
-from enum import Enum
 from typing import Any, Dict
 
 import httpx
@@ -9,6 +8,7 @@ from .dataclasses import (
     EnergyYield,
     MtuType,
     MtuYield,
+    SystemType,
     TedCt,
     TedCtGroup,
     TedMtu,
@@ -26,13 +26,6 @@ ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
 
 class TED6000(TED):
     """Instance of TED6000."""
-
-    class SystemType(Enum):
-        """Defines the various TED6000 System Types"""
-
-        NET = 0
-        NET_GEN = 1
-        NET_LOAD = 2
 
     def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
         super().__init__(host, async_client)
@@ -99,7 +92,7 @@ class TED6000(TED):
     @property
     def system_type(self) -> SystemType:
         """Return the MTU configuration of the system."""
-        return TED6000.SystemType(
+        return SystemType(
             int(
                 self.endpoint_settings_results["SystemSettings"]["Configuration"][
                     "SystemType"
