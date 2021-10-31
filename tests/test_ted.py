@@ -6,6 +6,7 @@ from httpx import Response
 
 from tedpy import createTED
 from tedpy.dataclasses import MtuType, YieldType
+from tedpy.ted6000 import TED6000
 
 
 def _fixtures_dir() -> Path:
@@ -99,14 +100,20 @@ async def test_ted_6000() -> None:
     respx.get("/api/SystemSettings.xml").mock(
         return_value=Response(200, text=_load_fixture("ted6000", "systemSettings.xml"))
     )
-    respx.get("/api/DashData.xml?T=0&D=0&M=0").mock(
-        return_value=Response(200, text=_load_fixture("ted6000", "dashData_total.xml"))
-    )
     respx.get("/api/SystemOverview.xml").mock(
         return_value=Response(200, text=_load_fixture("ted6000", "systemOverview.xml"))
     )
     respx.get("/api/SpyderData.xml").mock(
         return_value=Response(200, text=_load_fixture("ted6000", "spyderData.xml"))
+    )
+    respx.get("/api/DashData.xml?T=0&D=0&M=0").mock(
+        return_value=Response(200, text=_load_fixture("ted6000", "dashData_total.xml"))
+    )
+    respx.get("/api/DashData.xml?T=0&D=1&M=0").mock(
+        return_value=Response(200, text=_load_fixture("ted6000", "dashData_mtu1.xml"))
+    )
+    respx.get("/api/DashData.xml?T=0&D=2&M=0").mock(
+        return_value=Response(200, text=_load_fixture("ted6000", "dashData_mtu3.xml"))
     )
     respx.get("/api/DashData.xml?T=0&D=255&M=1").mock(
         return_value=Response(200, text=_load_fixture("ted6000", "dashData_mtu1.xml"))
@@ -121,10 +128,22 @@ async def test_ted_6000() -> None:
     reader = await createTED("127.0.0.1")
     await reader.update()
 
+    assert reader.system_type == TED6000.SystemType.NET_GEN
+
     assert reader.total_consumption().type == YieldType.SYSTEM_NET
     assert reader.total_consumption().now == 3313
     assert reader.total_consumption().daily == 35684
     assert reader.total_consumption().mtd == 943962
+
+    assert reader.total_load().type == YieldType.SYSTEM_LOAD
+    assert reader.total_load().now == 1591
+    assert reader.total_load().daily == 22846
+    assert reader.total_load().mtd == 705341
+
+    assert reader.total_generation().type == YieldType.SYSTEM_GENERATION
+    assert reader.total_generation().now == -438
+    assert reader.total_generation().daily == -1845
+    assert reader.total_generation().mtd == -9688
 
     assert len(reader.mtus) == 3
     assert reader.mtus[0].id == "10028B"

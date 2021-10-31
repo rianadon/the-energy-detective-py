@@ -1,5 +1,6 @@
 """Implementation for the TED6000 meter."""
 import asyncio
+from enum import Enum
 from typing import Any, Dict
 
 import httpx
@@ -17,7 +18,7 @@ from .dataclasses import (
 from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
-ENDPOINT_URL_DASHBOARD = "http://{}/api/DashData.xml?T=0&D=0&M=0"
+ENDPOINT_URL_DASHBOARD = "http://{}/api/DashData.xml?T=0&D={}&M=0"
 ENDPOINT_URL_MTUDASHBOARD = "http://{}/api/DashData.xml?T=0&D=255&M={}"
 ENDPOINT_URL_MTU = "http://{}/api/SystemOverview.xml?T=0&D=0&M=0"
 ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
@@ -26,6 +27,13 @@ ENDPOINT_URL_SPYDER = "http://{}/api/SpyderData.xml?T=0&M=0&D=0"
 class TED6000(TED):
     """Instance of TED6000."""
 
+    class SystemType(Enum):
+        """Defines the various TED6000 System Types"""
+
+        NET = 0
+        NET_GEN = 1
+        NET_LOAD = 2
+
     def __init__(self, host: str, async_client: httpx.AsyncClient = None) -> None:
         super().__init__(host, async_client)
 
@@ -33,6 +41,7 @@ class TED6000(TED):
         self.endpoint_mtu_results: Any = None
         self.endpoint_spyder_results: Any = None
         self.endpoint_dashboard_results: Dict[int, Any] = dict()
+        self.endpoint_solardash_results: Dict[int, Any] = dict()
 
     async def update(self) -> None:
         """Fetch settings and power data from the endpoints."""
@@ -49,6 +58,12 @@ class TED6000(TED):
             self._update_endpoint("endpoint_spyder_results", ENDPOINT_URL_SPYDER),
             self._update_endpoint(
                 "endpoint_dashboard_results", ENDPOINT_URL_DASHBOARD, 0
+            ),
+            self._update_endpoint(
+                "endpoint_solardash_results", ENDPOINT_URL_DASHBOARD, 1
+            ),
+            self._update_endpoint(
+                "endpoint_solardash_results", ENDPOINT_URL_DASHBOARD, 2
             ),
             *map(
                 lambda mtu: self._update_endpoint(
@@ -81,11 +96,39 @@ class TED6000(TED):
         """Return the delay between successive polls of MTU data."""
         return self.endpoint_settings_results["SystemSettings"]["MTUPollingDelay"]
 
+    @property
+    def system_type(self) -> SystemType:
+        """Return the MTU configuration of the system."""
+        return TED6000.SystemType(
+            int(
+                self.endpoint_settings_results["SystemSettings"]["Configuration"][
+                    "SystemType"
+                ]
+            )
+        )
+
     def total_consumption(self) -> EnergyYield:
         """Return consumption information for the whole system."""
         data = self.endpoint_dashboard_results[0]["DashData"]
         return EnergyYield(
             YieldType.SYSTEM_NET, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
+        )
+
+    def total_load(self) -> EnergyYield:
+        """Return load information for the whole system."""
+        data = self.endpoint_solardash_results[1]["DashData"]
+        return EnergyYield(
+            YieldType.SYSTEM_LOAD, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
+        )
+
+    def total_generation(self) -> EnergyYield:
+        """Return generation information for the whole system."""
+        data = self.endpoint_solardash_results[2]["DashData"]
+        return EnergyYield(
+            YieldType.SYSTEM_GENERATION,
+            int(data["Now"]),
+            int(data["TDY"]),
+            int(data["MTD"]),
         )
 
     def mtu_value(self, mtu: TedMtu) -> MtuYield:
