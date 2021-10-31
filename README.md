@@ -17,7 +17,12 @@ HOST = 'ted6000'
 try:
     reader = await createTED(HOST)
     await reader.update()
-    reader.print_to_console()
+    reader.print_to_console() # Print all information
+    print(reader.energy()) # Total energy
+    print(reader.mtus[0].energy()) # # Energy per MTU
+    print(reader.mtus[0].power())
+    print(reader.spyders[0].ctgroups[0].energy()) # Energy per ctgroup
+
 except httpx.HTTPError:
     # Handle connection errors from createTED and update
 ```
