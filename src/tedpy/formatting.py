@@ -1,11 +1,14 @@
 """Formatting helper functions for classes."""
 
-from .dataclasses import Consumption, TedCt, TedCtGroup, TedMtu, TedSpyder
+from .dataclasses import EnergyYield, TedCt, TedCtGroup, TedMtu, TedSpyder
 
 
-def format_consumption(consumption: Consumption) -> str:
-    return "Now: {} kW, Today: {} kWh, Month-to-date: {} kWh".format(
-        consumption.now / 1000, consumption.daily / 1000, consumption.mtd / 1000
+def format_energy_yield(energy_yield: EnergyYield) -> str:
+    return "Type: {} Now: {} kW, Today: {} kWh, Month-to-date: {} kWh".format(
+        energy_yield.type,
+        energy_yield.now / 1000,
+        energy_yield.daily / 1000,
+        energy_yield.mtd / 1000,
     )
 
 

@@ -5,9 +5,9 @@ from typing import Any, List
 import httpx
 import xmltodict
 
-from .dataclasses import Consumption, MtuNet, TedCtGroup, TedMtu, TedSpyder
+from .dataclasses import EnergyYield, MtuYield, TedCtGroup, TedMtu, TedSpyder
 from .formatting import (
-    format_consumption,
+    format_energy_yield,
     format_ct,
     format_ctgroup,
     format_mtu,
@@ -51,18 +51,18 @@ class TED:
         """Return the description for the gateway."""
         return ""
 
-    def total_consumption(self) -> Consumption:
-        """Return consumption information for the whole system."""
+    def total_consumption(self) -> EnergyYield:
+        """Return energy yield information for the whole system."""
         raise NotImplementedError()
 
-    def mtu_value(self, mtu: TedMtu) -> MtuNet:
+    def mtu_value(self, mtu: TedMtu) -> MtuYield:
         """Return consumption or production information for a MTU based on type."""
         raise NotImplementedError()
 
     def spyder_ctgroup_consumption(
         self, spyder: TedSpyder, ctgroup: TedCtGroup
-    ) -> Consumption:
-        """Return consumption information for a spyder ctgroup."""
+    ) -> EnergyYield:
+        """Return energy yield information for a spyder ctgroup."""
         raise NotImplementedError()
 
     async def _check_endpoint(self, url: str, params: str = None) -> bool:
@@ -96,9 +96,9 @@ class TED:
                     raise
 
     def print_to_console(self) -> None:
-        """Print all the settings and consumption values to the console."""
+        """Print all the settings and energy yield values to the console."""
         print("Gateway id:", self.gateway_id)
-        print("Consumption:", format_consumption(self.total_consumption()))
+        print("System:", format_energy_yield(self.total_consumption()))
         print()
 
         print("MTUs:")
@@ -114,4 +114,4 @@ class TED:
                 for c in g.member_cts:
                     print("      " + format_ct(c))
                 consumption = self.spyder_ctgroup_consumption(s, g)
-                print("      Consumption:", format_consumption(consumption))
+                print("      Consumption:", format_energy_yield(consumption))

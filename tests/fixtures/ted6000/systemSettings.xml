@@ -135,7 +135,7 @@
 				<Description>Obj1</Description>
 			</CT>
 			<CT>
-				<Type>0</Type>
+				<Type>1</Type>
 				<Mult>100</Mult>
 				<Description>Obj2</Description>
 			</CT>
@@ -175,7 +175,7 @@
 			</Group>
 			<Group>
 				<Description>Obj2</Description>
-				<UseCT>2</UseCT>
+				<UseCT>7</UseCT>
 			</Group>
 			<Group>
 				<Description>Obj3</Description>

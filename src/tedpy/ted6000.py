@@ -5,13 +5,14 @@ from typing import Any, Dict
 import httpx
 
 from .dataclasses import (
-    Consumption,
-    MtuNet,
+    EnergyYield,
     MtuType,
+    MtuYield,
     TedCt,
     TedCtGroup,
     TedMtu,
     TedSpyder,
+    YieldType,
 )
 from .ted import TED
 
@@ -80,35 +81,41 @@ class TED6000(TED):
         """Return the delay between successive polls of MTU data."""
         return self.endpoint_settings_results["SystemSettings"]["MTUPollingDelay"]
 
-    def total_consumption(self) -> Consumption:
+    def total_consumption(self) -> EnergyYield:
         """Return consumption information for the whole system."""
         data = self.endpoint_dashboard_results[0]["DashData"]
-        return Consumption(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
+        return EnergyYield(
+            YieldType.SYSTEM_NET, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
+        )
 
-    def mtu_value(self, mtu: TedMtu) -> MtuNet:
+    def mtu_value(self, mtu: TedMtu) -> MtuYield:
         """Return consumption or production information for a MTU based on type."""
         mtu_doc = self.endpoint_mtu_results["DialDataDetail"]["MTUVal"][
             "MTU%d" % mtu.position
         ]
         type = mtu.type
         dashdata = self.endpoint_dashboard_results[mtu.position]["DashData"]
-        now = int(dashdata["Now"])
-        tdy = int(dashdata["TDY"])
-        mtd = int(dashdata["MTD"])
+        power_now = int(dashdata["Now"])
+        power_tdy = int(dashdata["TDY"])
+        power_mtd = int(dashdata["MTD"])
+        energyYield = EnergyYield(YieldType.MTU, power_now, power_tdy, power_mtd)
         ap_power = int(mtu_doc["KVA"])
         power_factor = int(mtu_doc["PF"]) / 10
         voltage = int(mtu_doc["Voltage"]) / 10
-        return MtuNet(type, now, tdy, mtd, ap_power, power_factor, voltage)
+        return MtuYield(type, energyYield, ap_power, power_factor, voltage)
 
     def spyder_ctgroup_consumption(
         self, spyder: TedSpyder, ctgroup: TedCtGroup
-    ) -> Consumption:
+    ) -> EnergyYield:
         """Return consumption information for a spyder ctgroup."""
         group_doc = self.endpoint_spyder_results["SpyderData"]["Spyder"][
             spyder.position
         ]["Group"][ctgroup.position]
-        return Consumption(
-            int(group_doc["Now"]), int(group_doc["TDY"]), int(group_doc["MTD"])
+        return EnergyYield(
+            YieldType.SPYDER_GROUP,
+            int(group_doc["Now"]),
+            int(group_doc["TDY"]),
+            int(group_doc["MTD"]),
         )
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
