@@ -7,9 +7,9 @@ import xmltodict
 
 from .dataclasses import EnergyYield, MtuYield, TedCtGroup, TedMtu, TedSpyder
 from .formatting import (
-    format_energy_yield,
     format_ct,
     format_ctgroup,
+    format_energy_yield,
     format_mtu,
     format_spyder,
 )
