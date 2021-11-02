@@ -12,11 +12,9 @@ if TYPE_CHECKING:
 class YieldType(Enum):
     """Represents the different types of system yields."""
 
-    SYSTEM_NET = 0
-    SYSTEM_LOAD = 1
-    SYSTEM_GENERATION = 2
-    MTU = 3
-    SPYDER_GROUP = 4
+    NET = 0
+    LOAD = 1
+    GEN = 2
 
 
 class MtuType(Enum):
@@ -43,6 +41,14 @@ class Power(NamedTuple):
     apparent_power: int
     power_factor: float
     voltage: float
+
+
+class SystemType(Enum):
+    """Defines the various TED6000 System Types."""
+
+    NET = 0
+    NET_GEN = 1
+    NET_LOAD = 2
 
 
 @dataclass
