@@ -84,10 +84,7 @@ class TED6000(TED):
     def energy(self) -> EnergyYield:
         """Return energy yield information for the whole system."""
         data = self.endpoint_dash_results[0]["DashData"]
-        energy = EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
-        if energy == EnergyYield(0, 0, 0):
-            return self.consumption()
-        return energy
+        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     @property
     def system_type(self) -> SystemType:
