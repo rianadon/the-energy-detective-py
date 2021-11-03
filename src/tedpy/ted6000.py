@@ -84,7 +84,10 @@ class TED6000(TED):
     def energy(self) -> EnergyYield:
         """Return energy yield information for the whole system."""
         data = self.endpoint_dash_results[0]["DashData"]
-        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
+        energy = EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
+        if energy == EnergyYield(0, 0, 0):
+            return self.consumption()
+        return energy
 
     @property
     def system_type(self) -> SystemType:
@@ -110,7 +113,7 @@ class TED6000(TED):
     def production(self) -> EnergyYield:
         """Return generation information for the whole system."""
         data = self.endpoint_dash_results[2]["DashData"]
-        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
+        return EnergyYield(-int(data["Now"]), -int(data["TDY"]), -int(data["MTD"]))
 
     def _mtu_power(self, mtu: TedMtu) -> Power:
         """Return power information for a MTU."""
