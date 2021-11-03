@@ -124,9 +124,9 @@ async def test_ted_6000() -> None:
     assert reader.consumption().daily == 22846
     assert reader.consumption().mtd == 705341
 
-    assert reader.production().now == -438
-    assert reader.production().daily == -1845
-    assert reader.production().mtd == -9688
+    assert reader.production().now == 438
+    assert reader.production().daily == 1845
+    assert reader.production().mtd == 9688
 
     assert len(reader.mtus) == 3
     assert reader.mtus[0].id == "10028B"
