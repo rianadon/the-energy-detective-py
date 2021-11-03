@@ -4,7 +4,7 @@ from typing import Any
 
 import httpx
 
-from .dataclasses import EnergyYield, MtuType, Power, TedMtu, YieldType
+from .dataclasses import EnergyYield, MtuType, Power, TedMtu
 from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
@@ -52,7 +52,7 @@ class TED5000(TED):
         power_now = int(data["Power"]["Total"]["PowerNow"])
         power_day = int(data["Power"]["Total"]["PowerTDY"])
         power_mtd = int(data["Power"]["Total"]["PowerMTD"])
-        return EnergyYield(YieldType.NET, power_now, power_day, power_mtd)
+        return EnergyYield(power_now, power_day, power_mtd)
 
     def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
         """Return consumption or production information for a MTU."""
@@ -60,7 +60,7 @@ class TED5000(TED):
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
         power_tdy = int(data["Power"]["MTU%d" % mtu.position]["PowerTDY"])
         power_mtd = int(data["Power"]["MTU%d" % mtu.position]["PowerMTD"])
-        return EnergyYield(YieldType.NET, power_now, power_tdy, power_mtd)
+        return EnergyYield(power_now, power_tdy, power_mtd)
 
     def _mtu_power(self, mtu: TedMtu) -> Power:
         """Return power information for a MTU."""

@@ -5,7 +5,7 @@ import respx
 from httpx import Response
 
 from tedpy import createTED
-from tedpy.dataclasses import EnergyYield, MtuType, SystemType, TedCt, YieldType
+from tedpy.dataclasses import EnergyYield, MtuType, SystemType, TedCt
 
 
 def _fixtures_dir() -> Path:
@@ -34,7 +34,6 @@ async def test_ted_5000() -> None:
     assert reader.gateway_id == "2154E6"
     assert reader.gateway_description == "Demo System"
 
-    assert reader.energy().type == YieldType.NET
     assert reader.energy().now == 9632
     assert reader.energy().daily == 38553
     assert reader.energy().mtd == 277266
@@ -61,19 +60,19 @@ async def test_ted_5000() -> None:
     assert reader.mtus[3].power_cal_factor == 100
     assert reader.mtus[3].voltage_cal_factor == 100
 
-    assert reader.mtus[0].energy() == EnergyYield(YieldType.NET, 5840, 28611, 227562)
+    assert reader.mtus[0].energy() == EnergyYield(5840, 28611, 227562)
     assert reader.mtus[0].power().apparent_power == 6062
     assert reader.mtus[0].power().power_factor == 96.3
     assert reader.mtus[0].power().voltage == 119.7
-    assert reader.mtus[1].energy() == EnergyYield(YieldType.NET, 438, 1845, 9688)
+    assert reader.mtus[1].energy() == EnergyYield(438, 1845, 9688)
     assert reader.mtus[1].power().apparent_power == 462
     assert reader.mtus[1].power().power_factor == 94.8
     assert reader.mtus[1].power().voltage == 119.6
-    assert reader.mtus[2].energy() == EnergyYield(YieldType.NET, 3354, 8097, 40016)
+    assert reader.mtus[2].energy() == EnergyYield(3354, 8097, 40016)
     assert reader.mtus[2].power().apparent_power == 3680
     assert reader.mtus[2].power().power_factor == 91.1
     assert reader.mtus[2].power().voltage == 118.9
-    assert reader.mtus[3].energy() == EnergyYield(YieldType.NET, 0, 0, 0)
+    assert reader.mtus[3].energy() == EnergyYield(0, 0, 0)
     assert reader.mtus[3].power().apparent_power == 0
     assert reader.mtus[3].power().power_factor == 0
     assert reader.mtus[3].power().voltage == 0
@@ -117,17 +116,14 @@ async def test_ted_6000() -> None:
 
     assert reader.system_type == SystemType.NET_GEN
 
-    assert reader.energy().type == YieldType.NET
     assert reader.energy().now == 3313
     assert reader.energy().daily == 35684
     assert reader.energy().mtd == 943962
 
-    assert reader.consumption().type == YieldType.LOAD
     assert reader.consumption().now == 1591
     assert reader.consumption().daily == 22846
     assert reader.consumption().mtd == 705341
 
-    assert reader.production().type == YieldType.GEN
     assert reader.production().now == -438
     assert reader.production().daily == -1845
     assert reader.production().mtd == -9688
@@ -149,15 +145,15 @@ async def test_ted_6000() -> None:
     assert reader.mtus[2].power_cal_factor == 100.0
     assert reader.mtus[2].voltage_cal_factor == 100.0
 
-    assert reader.mtus[0].energy() == EnergyYield(YieldType.NET, 1591, 22846, 705341)
+    assert reader.mtus[0].energy() == EnergyYield(1591, 22846, 705341)
     assert reader.mtus[0].power().apparent_power == 3344
     assert reader.mtus[0].power().power_factor == 97.3
     assert reader.mtus[0].power().voltage == 123
-    assert reader.mtus[1].energy() == EnergyYield(YieldType.NET, 5840, 28611, 227562)
+    assert reader.mtus[1].energy() == EnergyYield(5840, 28611, 227562)
     assert reader.mtus[1].power().apparent_power == 52
     assert reader.mtus[1].power().power_factor == 80.7
     assert reader.mtus[1].power().voltage == 123
-    assert reader.mtus[2].energy() == EnergyYield(YieldType.NET, -438, -1845, -9688)
+    assert reader.mtus[2].energy() == EnergyYield(-438, -1845, -9688)
     assert reader.mtus[2].power().apparent_power == 0
     assert reader.mtus[2].power().power_factor == 0
     assert reader.mtus[2].power().voltage == 0
@@ -181,9 +177,9 @@ async def test_ted_6000() -> None:
     assert grp5.member_cts == [TedCt(4, "Obj5", 0, 100)]
     assert grp6.member_cts == [TedCt(5, "Obj6", 0, 100)]
 
-    assert grp1.energy() == EnergyYield(YieldType.NET, 0, 0, 1156)
-    assert grp2.energy() == EnergyYield(YieldType.NET, 568, 4672, 96045)
-    assert grp3.energy() == EnergyYield(YieldType.NET, 0, 0, 24141)
-    assert grp4.energy() == EnergyYield(YieldType.NET, 0, 0, 10034)
-    assert grp5.energy() == EnergyYield(YieldType.NET, 473, 7968, 253156)
-    assert grp6.energy() == EnergyYield(YieldType.NET, 0, 0, 0)
+    assert grp1.energy() == EnergyYield(0, 0, 1156)
+    assert grp2.energy() == EnergyYield(568, 4672, 96045)
+    assert grp3.energy() == EnergyYield(0, 0, 24141)
+    assert grp4.energy() == EnergyYield(0, 0, 10034)
+    assert grp5.energy() == EnergyYield(473, 7968, 253156)
+    assert grp6.energy() == EnergyYield(0, 0, 0)

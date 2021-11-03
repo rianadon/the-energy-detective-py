@@ -13,7 +13,6 @@ from .dataclasses import (
     TedCtGroup,
     TedMtu,
     TedSpyder,
-    YieldType,
 )
 from .ted import TED
 
@@ -85,9 +84,7 @@ class TED6000(TED):
     def energy(self) -> EnergyYield:
         """Return energy yield information for the whole system."""
         data = self.endpoint_dash_results[0]["DashData"]
-        return EnergyYield(
-            YieldType.NET, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
-        )
+        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     @property
     def system_type(self) -> SystemType:
@@ -103,23 +100,17 @@ class TED6000(TED):
     def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
         """Return consumption or production information for a MTU."""
         data = self.endpoint_mtudash_results[mtu.position]["DashData"]
-        return EnergyYield(
-            YieldType.NET, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
-        )
+        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     def consumption(self) -> EnergyYield:
         """Return load information for the whole system."""
         data = self.endpoint_dash_results[1]["DashData"]
-        return EnergyYield(
-            YieldType.LOAD, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
-        )
+        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     def production(self) -> EnergyYield:
         """Return generation information for the whole system."""
         data = self.endpoint_dash_results[2]["DashData"]
-        return EnergyYield(
-            YieldType.GEN, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
-        )
+        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     def _mtu_power(self, mtu: TedMtu) -> Power:
         """Return power information for a MTU."""
@@ -136,9 +127,7 @@ class TED6000(TED):
         data = self.endpoint_spyder_results["SpyderData"]["Spyder"][
             ctgroup.spyder_position
         ]["Group"][ctgroup.position]
-        return EnergyYield(
-            YieldType.NET, int(data["Now"]), int(data["TDY"]), int(data["MTD"])
-        )
+        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
         switcher = {

@@ -9,14 +9,6 @@ if TYPE_CHECKING:
     from . import TED
 
 
-class YieldType(Enum):
-    """Represents the different types of system yields."""
-
-    NET = 0
-    LOAD = 1
-    GEN = 2
-
-
 class MtuType(Enum):
     """TED Defined MTU configuration types."""
 
@@ -29,7 +21,6 @@ class MtuType(Enum):
 class EnergyYield(NamedTuple):
     """Represents yields from the various system components."""
 
-    type: YieldType
     now: int
     daily: int
     mtd: int
