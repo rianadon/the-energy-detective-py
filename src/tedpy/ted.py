@@ -113,7 +113,9 @@ class TED:
     def print_to_console(self) -> None:
         """Print all the settings and energy yield values to the console."""
         print("Gateway id:", self.gateway_id)
-        print("Energy:", format_energy_yield(self.energy()))
+        print("Net Energy:", format_energy_yield(self.energy()))
+        print("  Consumed:", format_energy_yield(self.consumption()))
+        print("  Produced:", format_energy_yield(self.production()))
         print()
 
         print("MTUs:")
