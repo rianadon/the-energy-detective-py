@@ -38,3 +38,31 @@ The module's tests can be run using `poetry run pytest` (make sure you `poetry i
 1. Install dependencies: `poetry install`
 2. Install pre-commit hooks: `poetry run pre-commit install`
 3. Develop!
+
+## Notes
+
+### System types
+
+The energy meter may be configured as 1 of 3 possible `SystemType`s: `NET`, `NET_GEN`, and `NET_LOAD`. `NET`, `GEN`, and `LOAD` here are defined as the following:
+
+- `NET`: Consumption from the grid
+- `GEN`: Solar power production
+- `LOAD`: Consumption from the grid, in the case where you are directly feeding the grid with solar
+
+If you have not connected solar power to the meter, your system type is most likeley `NET`. Otherwise, you are likely using `NET_GEN` type (measuring both grid consumption and solar power production). If you do not use an internal breaker for solar power and instead feed it directly back into the grid, you will have `LOAD_GEN` type.
+
+The TED6000 API returns NET (net power), GEN (power generated), and LOAD (power consumed by appliances). Below is a table summarizing how these are populated for each system type. `-(x)` indicates `x` is negated. Calculated fields are italicized.
+
+| SystemType | NET                                   | GEN                             | LOAD                                      |
+|-------------|---------------------------------------|---------------------------------|-------------------------------------------|
+| `NET`       | total consumption                     | 0                               | 0                                         |
+| `NET_GEN`   | grid consumption                      | -(solar power produced)         | *grid consumption + solar power produced* |
+| `LOAD_GEN`  | *grid consumption - solar production* | -(solar power produced to grid) | grid consumption                          |
+
+When using the `.energy()`, `.production()`, and `.consumption()` methods, the original values of the GEN column are inverted, and `.consumption()` is populated for the `NET` type:
+
+| SystemType | `.energy()`                           | `.production()`              | `.consumption()`                          |
+|-------------|---------------------------------------|------------------------------|-------------------------------------------|
+| `NET`       | total consumption                     | 0                            | total consumption                         |
+| `NET_GEN`   | grid consumption                      | solar power produced         | *grid consumption + solar power produced* |
+| `LOAD_GEN`  | *grid consumption - solar production* | solar power produced to grid | grid consumption                          |
