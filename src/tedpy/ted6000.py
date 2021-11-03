@@ -104,6 +104,8 @@ class TED6000(TED):
 
     def consumption(self) -> EnergyYield:
         """Return load information for the whole system."""
+        if self.system_type == SystemType.NET:
+            return self.energy()  # For NET type, consumption and energy are equal
         data = self.endpoint_dash_results[1]["DashData"]
         return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
 
