@@ -89,13 +89,8 @@ class TED6000(TED):
     @property
     def system_type(self) -> SystemType:
         """Return the MTU configuration of the system."""
-        return SystemType(
-            int(
-                self.endpoint_settings_results["SystemSettings"]["Configuration"][
-                    "SystemType"
-                ]
-            )
-        )
+        settings = self.endpoint_settings_results["SystemSettings"]
+        return SystemType(int(settings["Configuration"]["SystemType"]))
 
     def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
         """Return consumption or production information for a MTU."""

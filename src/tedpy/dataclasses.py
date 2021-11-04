@@ -39,7 +39,7 @@ class SystemType(Enum):
 
     NET = 0
     NET_GEN = 1
-    NET_LOAD = 2
+    GEN_LOAD = 2
 
 
 @dataclass
