@@ -89,3 +89,7 @@ The TED5000 API does not return a total system `.production()` and `.consumption
 Production is defined as the energy sum of all MTUs marked as type "LOAD", and Consumption is defined as the energy sum of all MTUs marked as type "GEN".
 
 NET and stand-alone types of MTUs are not included in these totals, whereas they are included in the `.energy()` total of the system.
+
+### TED5000 power factor
+
+See [#7](https://github.com/rianadon/the-energy-detective-py/issues/7) for info on how the power factor is calculated. There is a field returned by the API, but the documentation does not mention this field so the power factor is instead calculated manually.
