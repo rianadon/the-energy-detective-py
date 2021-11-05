@@ -5,7 +5,7 @@ import respx
 from httpx import Response
 
 from tedpy import createTED
-from tedpy.dataclasses import MtuType, SystemType, YieldType
+from tedpy.dataclasses import EnergyYield, MtuType, SystemType, TedCt
 
 
 def _fixtures_dir() -> Path:
@@ -34,20 +34,22 @@ async def test_ted_5000() -> None:
     assert reader.gateway_id == "2154E6"
     assert reader.gateway_description == "Demo System"
 
-    assert reader.total_consumption().type == YieldType.SYSTEM_NET
-    assert reader.total_consumption().now == 9632
-    assert reader.total_consumption().daily == 38553
-    assert reader.total_consumption().mtd == 277266
+    assert reader.energy().now == 9632
+    assert reader.energy().daily == 38553
+    assert reader.energy().mtd == 277266
+
+    assert reader.consumption() == EnergyYield(6278, 30456, 237250)
+    assert reader.production() == EnergyYield(0, 0, 0)
 
     assert len(reader.mtus) == 4
     assert reader.mtus[0].id == "109CE0"
     assert reader.mtus[0].description == "Pan 1"
-    assert reader.mtus[0].type == MtuType.NET
+    assert reader.mtus[0].type == MtuType.LOAD
     assert reader.mtus[0].power_cal_factor == 100
     assert reader.mtus[0].voltage_cal_factor == 100
     assert reader.mtus[1].id == "109CAD"
     assert reader.mtus[1].description == "Pan 2"
-    assert reader.mtus[1].type == MtuType.NET
+    assert reader.mtus[1].type == MtuType.LOAD
     assert reader.mtus[1].power_cal_factor == 100
     assert reader.mtus[1].voltage_cal_factor == 100
     assert reader.mtus[2].id == "109D3A"
@@ -61,34 +63,22 @@ async def test_ted_5000() -> None:
     assert reader.mtus[3].power_cal_factor == 100
     assert reader.mtus[3].voltage_cal_factor == 100
 
-    assert reader.mtu_value(reader.mtus[0]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[0]).energy.now == 5840
-    assert reader.mtu_value(reader.mtus[0]).energy.daily == 28611
-    assert reader.mtu_value(reader.mtus[0]).energy.mtd == 227562
-    assert reader.mtu_value(reader.mtus[0]).apparent_power == 6062
-    assert reader.mtu_value(reader.mtus[0]).power_factor == 96.3
-    assert reader.mtu_value(reader.mtus[0]).voltage == 119.7
-    assert reader.mtu_value(reader.mtus[1]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[1]).energy.now == 438
-    assert reader.mtu_value(reader.mtus[1]).energy.daily == 1845
-    assert reader.mtu_value(reader.mtus[1]).energy.mtd == 9688
-    assert reader.mtu_value(reader.mtus[1]).apparent_power == 462
-    assert reader.mtu_value(reader.mtus[1]).power_factor == 94.8
-    assert reader.mtu_value(reader.mtus[1]).voltage == 119.6
-    assert reader.mtu_value(reader.mtus[2]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[2]).energy.now == 3354
-    assert reader.mtu_value(reader.mtus[2]).energy.daily == 8097
-    assert reader.mtu_value(reader.mtus[2]).energy.mtd == 40016
-    assert reader.mtu_value(reader.mtus[2]).apparent_power == 3680
-    assert reader.mtu_value(reader.mtus[2]).power_factor == 91.1
-    assert reader.mtu_value(reader.mtus[2]).voltage == 118.9
-    assert reader.mtu_value(reader.mtus[3]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[3]).energy.now == 0
-    assert reader.mtu_value(reader.mtus[3]).energy.daily == 0
-    assert reader.mtu_value(reader.mtus[3]).energy.mtd == 0
-    assert reader.mtu_value(reader.mtus[3]).apparent_power == 0
-    assert reader.mtu_value(reader.mtus[3]).power_factor == 0
-    assert reader.mtu_value(reader.mtus[3]).voltage == 0
+    assert reader.mtus[0].energy() == EnergyYield(5840, 28611, 227562)
+    assert reader.mtus[0].power().apparent_power == 6062
+    assert reader.mtus[0].power().power_factor == 96.3
+    assert reader.mtus[0].power().voltage == 119.7
+    assert reader.mtus[1].energy() == EnergyYield(438, 1845, 9688)
+    assert reader.mtus[1].power().apparent_power == 462
+    assert reader.mtus[1].power().power_factor == 94.8
+    assert reader.mtus[1].power().voltage == 119.6
+    assert reader.mtus[2].energy() == EnergyYield(3354, 8097, 40016)
+    assert reader.mtus[2].power().apparent_power == 3680
+    assert reader.mtus[2].power().power_factor == 91.1
+    assert reader.mtus[2].power().voltage == 118.9
+    assert reader.mtus[3].energy() == EnergyYield(0, 0, 0)
+    assert reader.mtus[3].power().apparent_power == 0
+    assert reader.mtus[3].power().power_factor == 0
+    assert reader.mtus[3].power().voltage == 0
 
 
 @pytest.mark.asyncio
@@ -129,20 +119,17 @@ async def test_ted_6000() -> None:
 
     assert reader.system_type == SystemType.NET_GEN
 
-    assert reader.total_consumption().type == YieldType.SYSTEM_NET
-    assert reader.total_consumption().now == 3313
-    assert reader.total_consumption().daily == 35684
-    assert reader.total_consumption().mtd == 943962
+    assert reader.energy().now == 3313
+    assert reader.energy().daily == 35684
+    assert reader.energy().mtd == 943962
 
-    assert reader.total_load().type == YieldType.SYSTEM_LOAD
-    assert reader.total_load().now == 1591
-    assert reader.total_load().daily == 22846
-    assert reader.total_load().mtd == 705341
+    assert reader.consumption().now == 1591
+    assert reader.consumption().daily == 22846
+    assert reader.consumption().mtd == 705341
 
-    assert reader.total_generation().type == YieldType.SYSTEM_GENERATION
-    assert reader.total_generation().now == -438
-    assert reader.total_generation().daily == -1845
-    assert reader.total_generation().mtd == -9688
+    assert reader.production().now == 438
+    assert reader.production().daily == 1845
+    assert reader.production().mtd == 9688
 
     assert len(reader.mtus) == 3
     assert reader.mtus[0].id == "10028B"
@@ -161,110 +148,41 @@ async def test_ted_6000() -> None:
     assert reader.mtus[2].power_cal_factor == 100.0
     assert reader.mtus[2].voltage_cal_factor == 100.0
 
-    assert reader.mtu_value(reader.mtus[0]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[0]).energy.now == 1591
-    assert reader.mtu_value(reader.mtus[0]).energy.daily == 22846
-    assert reader.mtu_value(reader.mtus[0]).energy.mtd == 705341
-    assert reader.mtu_value(reader.mtus[0]).apparent_power == 3344
-    assert reader.mtu_value(reader.mtus[0]).power_factor == 97.3
-    assert reader.mtu_value(reader.mtus[0]).voltage == 123
-    assert reader.mtu_value(reader.mtus[1]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[1]).energy.now == 5840
-    assert reader.mtu_value(reader.mtus[1]).energy.daily == 28611
-    assert reader.mtu_value(reader.mtus[1]).energy.mtd == 227562
-    assert reader.mtu_value(reader.mtus[1]).apparent_power == 52
-    assert reader.mtu_value(reader.mtus[1]).power_factor == 80.7
-    assert reader.mtu_value(reader.mtus[1]).voltage == 123
-    assert reader.mtu_value(reader.mtus[2]).energy.type == YieldType.MTU
-    assert reader.mtu_value(reader.mtus[2]).energy.now == -438
-    assert reader.mtu_value(reader.mtus[2]).energy.daily == -1845
-    assert reader.mtu_value(reader.mtus[2]).energy.mtd == -9688
-    assert reader.mtu_value(reader.mtus[2]).apparent_power == 0
-    assert reader.mtu_value(reader.mtus[2]).power_factor == 0
-    assert reader.mtu_value(reader.mtus[2]).voltage == 0
+    assert reader.mtus[0].energy() == EnergyYield(1591, 22846, 705341)
+    assert reader.mtus[0].power().apparent_power == 3344
+    assert reader.mtus[0].power().power_factor == 97.3
+    assert reader.mtus[0].power().voltage == 123
+    assert reader.mtus[1].energy() == EnergyYield(5840, 28611, 227562)
+    assert reader.mtus[1].power().apparent_power == 52
+    assert reader.mtus[1].power().power_factor == 80.7
+    assert reader.mtus[1].power().voltage == 123
+    assert reader.mtus[2].energy() == EnergyYield(438, 1845, 9688)
+    assert reader.mtus[2].power().apparent_power == 0
+    assert reader.mtus[2].power().power_factor == 0
+    assert reader.mtus[2].power().voltage == 0
 
     assert len(reader.spyders) == 1
     spy = reader.spyders[0]
     assert len(spy.ctgroups) == 6
-    assert spy.ctgroups[0].position == 0
-    assert spy.ctgroups[0].description == "Obj1"
-    assert len(spy.ctgroups[0].member_cts) == 1
-    assert spy.ctgroups[0].member_cts[0].position == 0
-    assert spy.ctgroups[0].member_cts[0].description == "Obj1"
-    assert spy.ctgroups[0].member_cts[0].type == 0
-    assert spy.ctgroups[0].member_cts[0].multiplier == 100
-    assert len(spy.ctgroups[1].member_cts) == 3
-    assert spy.ctgroups[1].member_cts[0].position == 0
-    assert spy.ctgroups[1].member_cts[0].description == "Obj1"
-    assert spy.ctgroups[1].member_cts[0].type == 0
-    assert spy.ctgroups[1].member_cts[0].multiplier == 100
-    assert spy.ctgroups[1].member_cts[1].position == 1
-    assert spy.ctgroups[1].member_cts[1].description == "Obj2"
-    assert spy.ctgroups[1].member_cts[1].type == 1
-    assert spy.ctgroups[1].member_cts[1].multiplier == 100
-    assert spy.ctgroups[1].member_cts[2].position == 2
-    assert spy.ctgroups[1].member_cts[2].description == "Obj3"
-    assert spy.ctgroups[1].member_cts[2].type == 0
-    assert spy.ctgroups[1].member_cts[2].multiplier == 200
-    assert len(spy.ctgroups[2].member_cts) == 1
-    assert spy.ctgroups[2].member_cts[0].position == 2
-    assert spy.ctgroups[2].member_cts[0].description == "Obj3"
-    assert spy.ctgroups[2].member_cts[0].type == 0
-    assert spy.ctgroups[2].member_cts[0].multiplier == 200
-    assert len(spy.ctgroups[3].member_cts) == 1
-    assert spy.ctgroups[3].member_cts[0].position == 3
-    assert spy.ctgroups[3].member_cts[0].description == "Obj4"
-    assert spy.ctgroups[3].member_cts[0].type == 0
-    assert spy.ctgroups[3].member_cts[0].multiplier == 200
-    assert len(spy.ctgroups[4].member_cts) == 1
-    assert spy.ctgroups[4].member_cts[0].position == 4
-    assert spy.ctgroups[4].member_cts[0].description == "Obj5"
-    assert spy.ctgroups[4].member_cts[0].type == 0
-    assert spy.ctgroups[4].member_cts[0].multiplier == 100
-    assert len(spy.ctgroups[5].member_cts) == 1
-    assert spy.ctgroups[5].member_cts[0].position == 5
-    assert spy.ctgroups[5].member_cts[0].description == "Obj6"
-    assert spy.ctgroups[5].member_cts[0].type == 0
-    assert spy.ctgroups[5].member_cts[0].multiplier == 100
-    assert (
-        reader.spyder_ctgroup_consumption(spy, spy.ctgroups[0]).type
-        == YieldType.SPYDER_GROUP
-    )
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[0]).now == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[0]).daily == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[0]).mtd == 1156
-    assert (
-        reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).type
-        == YieldType.SPYDER_GROUP
-    )
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).now == 568
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).daily == 4672
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[1]).mtd == 96045
-    assert (
-        reader.spyder_ctgroup_consumption(spy, spy.ctgroups[2]).type
-        == YieldType.SPYDER_GROUP
-    )
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[2]).now == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[2]).daily == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[2]).mtd == 24141
-    assert (
-        reader.spyder_ctgroup_consumption(spy, spy.ctgroups[3]).type
-        == YieldType.SPYDER_GROUP
-    )
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[3]).now == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[3]).daily == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[3]).mtd == 10034
-    assert (
-        reader.spyder_ctgroup_consumption(spy, spy.ctgroups[4]).type
-        == YieldType.SPYDER_GROUP
-    )
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[4]).now == 473
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[4]).daily == 7968
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[4]).mtd == 253156
-    assert (
-        reader.spyder_ctgroup_consumption(spy, spy.ctgroups[5]).type
-        == YieldType.SPYDER_GROUP
-    )
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[5]).now == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[5]).daily == 0
-    assert reader.spyder_ctgroup_consumption(spy, spy.ctgroups[5]).mtd == 0
+    [grp1, grp2, grp3, grp4, grp5, grp6] = spy.ctgroups
+
+    assert grp1.position == 0
+    assert grp1.description == "Obj1"
+
+    assert grp1.member_cts == [TedCt(0, "Obj1", 0, 100)]
+    assert grp2.member_cts == [
+        TedCt(0, "Obj1", 0, 100),
+        TedCt(1, "Obj2", 1, 100),
+        TedCt(2, "Obj3", 0, 200),
+    ]
+    assert grp3.member_cts == [TedCt(2, "Obj3", 0, 200)]
+    assert grp4.member_cts == [TedCt(3, "Obj4", 0, 200)]
+    assert grp5.member_cts == [TedCt(4, "Obj5", 0, 100)]
+    assert grp6.member_cts == [TedCt(5, "Obj6", 0, 100)]
+
+    assert grp1.energy() == EnergyYield(0, 0, 1156)
+    assert grp2.energy() == EnergyYield(568, 4672, 96045)
+    assert grp3.energy() == EnergyYield(0, 0, 24141)
+    assert grp4.energy() == EnergyYield(0, 0, 10034)
+    assert grp5.energy() == EnergyYield(473, 7968, 253156)
+    assert grp6.energy() == EnergyYield(0, 0, 0)

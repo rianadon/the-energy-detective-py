@@ -1,17 +1,12 @@
 """Classes for representing parts of a TED device."""
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, NamedTuple
+from typing import TYPE_CHECKING, List, NamedTuple
 
-
-class YieldType(Enum):
-    """Represents the different types of system yields."""
-
-    SYSTEM_NET = 0
-    SYSTEM_LOAD = 1
-    SYSTEM_GENERATION = 2
-    MTU = 3
-    SPYDER_GROUP = 4
+if TYPE_CHECKING:
+    from . import TED
 
 
 class MtuType(Enum):
@@ -23,12 +18,44 @@ class MtuType(Enum):
     STAND_ALONE = 3
 
 
+class EnergyYield(NamedTuple):
+    """Represents yields from the various system components."""
+
+    now: int
+    daily: int
+    mtd: int
+
+    def __add__(self, other: tuple) -> EnergyYield:
+        """Add two EnergyYield objects by adding each energy total."""
+        if not isinstance(other, EnergyYield):
+            raise ValueError("only EnergyYields can be added to EnergyYields")
+        return EnergyYield(
+            self.now + other.now, self.daily + other.daily, self.mtd + other.mtd
+        )
+
+    def __sub__(self, other: tuple) -> EnergyYield:
+        """Subtract two EnergyYield objects by subtracting each energy total."""
+        if not isinstance(other, EnergyYield):
+            raise ValueError("only EnergyYields can be subtracted from EnergyYields")
+        return EnergyYield(
+            self.now - other.now, self.daily - other.daily, self.mtd - other.mtd
+        )
+
+
+class Power(NamedTuple):
+    """Power information for an MTU."""
+
+    apparent_power: int
+    power_factor: float
+    voltage: float
+
+
 class SystemType(Enum):
-    """Defines the various TED6000 System Types"""
+    """Defines the various TED6000 System Types."""
 
     NET = 0
     NET_GEN = 1
-    NET_LOAD = 2
+    GEN_LOAD = 2
 
 
 @dataclass
@@ -41,6 +68,15 @@ class TedMtu:
     type: MtuType
     power_cal_factor: float
     voltage_cal_factor: float
+    _ted: TED
+
+    def energy(self) -> EnergyYield:
+        """Return energy yield information for the MTU."""
+        return self._ted._mtu_energy(self)
+
+    def power(self) -> Power:
+        """Return power information for the MTU."""
+        return self._ted._mtu_power(self)
 
 
 @dataclass
@@ -58,8 +94,14 @@ class TedCtGroup:
     """Group of readings on a Spyder."""
 
     position: int
+    spyder_position: int
     description: str
     member_cts: List[TedCt]
+    _ted: TED
+
+    def energy(self) -> EnergyYield:
+        """Return energy yield information for the ctgroup."""
+        return self._ted._ctgroup_energy(self)
 
 
 @dataclass
@@ -70,22 +112,3 @@ class TedSpyder:
     secondary: int
     mtu_parent: str
     ctgroups: List[TedCtGroup]
-
-
-class EnergyYield(NamedTuple):
-    """Represents yields from the various system components"""
-
-    type: YieldType
-    now: int
-    daily: int
-    mtd: int
-
-
-class MtuYield(NamedTuple):
-    """Consumption or Production for an MTU."""
-
-    type: MtuType
-    energy: EnergyYield
-    apparent_power: int
-    power_factor: float
-    voltage: float

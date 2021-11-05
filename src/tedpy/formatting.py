@@ -4,8 +4,7 @@ from .dataclasses import EnergyYield, TedCt, TedCtGroup, TedMtu, TedSpyder
 
 
 def format_energy_yield(energy_yield: EnergyYield) -> str:
-    return "Type: {} Now: {} kW, Today: {} kWh, Month-to-date: {} kWh".format(
-        energy_yield.type,
+    return "Now: {} kW, Today: {} kWh, Month-to-date: {} kWh".format(
         energy_yield.now / 1000,
         energy_yield.daily / 1000,
         energy_yield.mtd / 1000,

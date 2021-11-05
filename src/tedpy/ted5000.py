@@ -4,7 +4,7 @@ from typing import Any
 
 import httpx
 
-from .dataclasses import EnergyYield, MtuType, MtuYield, TedMtu, YieldType
+from .dataclasses import EnergyYield, MtuType, Power, TedMtu
 from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
@@ -46,34 +46,56 @@ class TED5000(TED):
             "GatewayDescription"
         ]
 
-    def total_consumption(self) -> EnergyYield:
-        """Return consumption information for the whole system."""
+    def energy(self) -> EnergyYield:
+        """Return energy yield information for the whole system."""
         data = self.endpoint_data_results["LiveData"]
         power_now = int(data["Power"]["Total"]["PowerNow"])
         power_day = int(data["Power"]["Total"]["PowerTDY"])
         power_mtd = int(data["Power"]["Total"]["PowerMTD"])
-        return EnergyYield(YieldType.SYSTEM_NET, power_now, power_day, power_mtd)
+        return EnergyYield(power_now, power_day, power_mtd)
 
-    def mtu_value(self, mtu: TedMtu) -> MtuYield:
-        """Return consumption or production information for a MTU based on type."""
+    def consumption(self) -> EnergyYield:
+        """Return load information for the whole system."""
+        load = EnergyYield(0, 0, 0)
+        for mtu in self.mtus:
+            if mtu.type == MtuType.LOAD:
+                load += mtu.energy()
+        return load
+
+    def production(self) -> EnergyYield:
+        """Return generation information for the whole system."""
+        gen = EnergyYield(0, 0, 0)
+        for mtu in self.mtus:
+            if mtu.type == MtuType.GENERATION:
+                gen += mtu.energy()
+        return gen
+
+    def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
+        """Return consumption or production information for a MTU."""
         data = self.endpoint_data_results["LiveData"]
-        type = mtu.type
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
         power_tdy = int(data["Power"]["MTU%d" % mtu.position]["PowerTDY"])
         power_mtd = int(data["Power"]["MTU%d" % mtu.position]["PowerMTD"])
-        energyYield = EnergyYield(YieldType.MTU, power_now, power_tdy, power_mtd)
+        if mtu.type == MtuType.GENERATION:
+            return EnergyYield(-power_now, -power_tdy, -power_mtd)
+        return EnergyYield(power_now, power_tdy, power_mtd)
+
+    def _mtu_power(self, mtu: TedMtu) -> Power:
+        """Return power information for a MTU."""
+        data = self.endpoint_data_results["LiveData"]
+        power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
         ap_power = int(data["Power"]["MTU%d" % mtu.position]["KVA"])
         power_factor = 0.0
         if ap_power != 0:
             power_factor = round(((power_now / ap_power) * 100), 1)
         voltage = int(data["Voltage"]["MTU%d" % mtu.position]["VoltageNow"]) / 10
-        return MtuYield(type, energyYield, ap_power, power_factor, voltage)
+        return Power(ap_power, power_factor, voltage)
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
         switcher = {
-            0: MtuType.NET,
+            0: MtuType.LOAD,
             1: MtuType.GENERATION,
-            2: MtuType.LOAD,
+            2: MtuType.NET,
             3: MtuType.STAND_ALONE,
         }
         return switcher.get(mtu_type, MtuType.STAND_ALONE)
@@ -86,14 +108,14 @@ class TED5000(TED):
         mtu_settings = self.endpoint_settings_results["SystemSettings"]["MTUs"]["MTU"]
         solar_settings = self.endpoint_settings_results["SystemSettings"]["Solar"]
         for mtu_doc in mtu_settings[0:num_mtus]:
-            mtu_id = mtu_doc["MTUID"]
             mtu_number = int(mtu_doc["MTUNumber"])
             mtu = TedMtu(
-                mtu_id,
+                mtu_doc["MTUID"],
                 mtu_number,
                 mtu_doc["MTUDescription"],
                 self._parse_mtu_type(int(solar_settings["SolarConfig%d" % mtu_number])),
                 int(mtu_doc["PowerCalibrationFactor"]),
                 int(mtu_doc["VoltageCalibrationFactor"]),
+                self,
             )
             self.mtus.append(mtu)
