@@ -66,3 +66,12 @@ When using the `.energy()`, `.production()`, and `.consumption()` methods, the o
 | `NET`       | total consumption                     | 0                            | total consumption                         |
 | `NET_GEN`   | grid consumption                      | solar power produced         | *grid consumption + solar power produced* |
 | `LOAD_GEN`  | *grid consumption - solar production* | solar power produced to grid | grid consumption                          |
+
+### Inverted GEN values
+
+To keep consistency with the `.consumption()` method, MTUs configured as `GEN` will additionally return positive `EnergyYield` values (i.e. their negative values will be inverted to positive values). It is recommended you format MTU values as such:
+
+```python
+data = "Production" if (mtu.type == MtuType.GENERATION) else "Consumption"
+return f"{mtu.description} {data}: {mtu.energy()}"
+```

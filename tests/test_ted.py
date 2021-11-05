@@ -153,7 +153,7 @@ async def test_ted_6000() -> None:
     assert reader.mtus[1].power().apparent_power == 52
     assert reader.mtus[1].power().power_factor == 80.7
     assert reader.mtus[1].power().voltage == 123
-    assert reader.mtus[2].energy() == EnergyYield(-438, -1845, -9688)
+    assert reader.mtus[2].energy() == EnergyYield(438, 1845, 9688)
     assert reader.mtus[2].power().apparent_power == 0
     assert reader.mtus[2].power().power_factor == 0
     assert reader.mtus[2].power().voltage == 0

@@ -95,7 +95,12 @@ class TED6000(TED):
     def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
         """Return consumption or production information for a MTU."""
         data = self.endpoint_mtudash_results[mtu.position]["DashData"]
-        return EnergyYield(int(data["Now"]), int(data["TDY"]), int(data["MTD"]))
+        now, today, month = int(data["Now"]), int(data["TDY"]), int(data["MTD"])
+        if mtu.type == MtuType.GENERATION:
+            # Invert GEN-type MTUs
+            return EnergyYield(-now, -today, -month)
+        else:
+            return EnergyYield(now, today, month)
 
     def consumption(self) -> EnergyYield:
         """Return load information for the whole system."""
