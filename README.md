@@ -49,7 +49,7 @@ The energy meter may be configured as 1 of 3 possible `SystemType`s: `NET`, `NET
 - `GEN`: Solar power production
 - `LOAD`: Consumption from the grid, in the case where you are directly feeding the grid with solar
 
-If you have not connected solar power to the meter, your system type is most likeley `NET`. Otherwise, you are likely using `NET_GEN` type (measuring both grid consumption and solar power production). If you do not use an internal breaker for solar power and instead feed it directly back into the grid, you will have `LOAD_GEN` type.
+If you have not connected solar power to the meter, your system type is most likely `NET`. Otherwise, you are likely using `NET_GEN` type (measuring both grid consumption and solar power production). If you do not use an internal breaker for solar power and instead feed it directly back into the grid, you will have `LOAD_GEN` type.
 
 The TED6000 API returns NET (net power), GEN (power generated), and LOAD (power consumed by appliances). Below is a table summarizing how these are populated for each system type. `-(x)` indicates `x` is negated. Calculated fields are italicized.
 
