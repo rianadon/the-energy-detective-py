@@ -60,6 +60,8 @@ class TED5000(TED):
         power_now = int(data["Power"]["MTU%d" % mtu.position]["PowerNow"])
         power_tdy = int(data["Power"]["MTU%d" % mtu.position]["PowerTDY"])
         power_mtd = int(data["Power"]["MTU%d" % mtu.position]["PowerMTD"])
+        if mtu.type == MtuType.GENERATION:
+            return EnergyYield(-power_now, -power_tdy, -power_mtd)
         return EnergyYield(power_now, power_tdy, power_mtd)
 
     def _mtu_power(self, mtu: TedMtu) -> Power:

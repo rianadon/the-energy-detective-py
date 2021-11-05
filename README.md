@@ -43,7 +43,7 @@ The module's tests can be run using `poetry run pytest` (make sure you `poetry i
 
 ### System types
 
-The energy meter may be configured as 1 of 3 possible `SystemType`s: `NET`, `NET_GEN`, and `NET_LOAD`. `NET`, `GEN`, and `LOAD` here are defined as the following:
+The energy meter may be configured as 1 of 3 possible `SystemType`s: `NET`, `NET_GEN`, and `LOAD_GEN` (referred to in documentation as `NET_LOAD`). `NET`, `GEN`, and `LOAD` are the possible MTU types defined as the following:
 
 - `NET`: Consumption from the grid
 - `GEN`: Solar power production
