@@ -54,6 +54,22 @@ class TED5000(TED):
         power_mtd = int(data["Power"]["Total"]["PowerMTD"])
         return EnergyYield(power_now, power_day, power_mtd)
 
+    def consumption(self) -> EnergyYield:
+        """Return load information for the whole system."""
+        load = EnergyYield(0, 0, 0)
+        for mtu in self.mtus:
+            if mtu.type == MtuType.LOAD:
+                load += mtu.energy()
+        return load
+
+    def production(self) -> EnergyYield:
+        """Return generation information for the whole system."""
+        gen = EnergyYield(0, 0, 0)
+        for mtu in self.mtus:
+            if mtu.type == MtuType.GENERATION:
+                gen += mtu.energy()
+        return gen
+
     def _mtu_energy(self, mtu: TedMtu) -> EnergyYield:
         """Return consumption or production information for a MTU."""
         data = self.endpoint_data_results["LiveData"]
@@ -77,9 +93,9 @@ class TED5000(TED):
 
     def _parse_mtu_type(self, mtu_type: int) -> MtuType:
         switcher = {
-            0: MtuType.NET,
+            0: MtuType.LOAD,
             1: MtuType.GENERATION,
-            2: MtuType.LOAD,
+            2: MtuType.NET,
             3: MtuType.STAND_ALONE,
         }
         return switcher.get(mtu_type, MtuType.STAND_ALONE)

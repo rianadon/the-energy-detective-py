@@ -25,6 +25,22 @@ class EnergyYield(NamedTuple):
     daily: int
     mtd: int
 
+    def __add__(self, other: tuple) -> EnergyYield:
+        """Add two EnergyYield objects by adding each energy total."""
+        if not isinstance(other, EnergyYield):
+            raise ValueError("only EnergyYields can be added to EnergyYields")
+        return EnergyYield(
+            self.now + other.now, self.daily + other.daily, self.mtd + other.mtd
+        )
+
+    def __sub__(self, other: tuple) -> EnergyYield:
+        """Subtract two EnergyYield objects by subtracting each energy total."""
+        if not isinstance(other, EnergyYield):
+            raise ValueError("only EnergyYields can be subtracted from EnergyYields")
+        return EnergyYield(
+            self.now - other.now, self.daily - other.daily, self.mtd - other.mtd
+        )
+
 
 class Power(NamedTuple):
     """Power information for an MTU."""

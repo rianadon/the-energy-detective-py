@@ -75,3 +75,10 @@ To keep consistency with the `.consumption()` method, MTUs configured as `GEN` w
 data = "Production" if (mtu.type == MtuType.GENERATION) else "Consumption"
 return f"{mtu.description} {data}: {mtu.energy()}"
 ```
+
+### TED5000 consumption and production
+
+The TED5000 API does not return a total system `.production()` and `.consumption()` value, so the library calculates one itself.
+Production is defined as the energy sum of all MTUs marked as type "LOAD", and Consumption is defined as the energy sum of all MTUs marked as type "GEN".
+
+NET and stand-alone types of MTUs are not included in these totals, whereas they are included in the `.energy()` total of the system.

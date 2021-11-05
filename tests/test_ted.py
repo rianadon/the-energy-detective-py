@@ -38,15 +38,18 @@ async def test_ted_5000() -> None:
     assert reader.energy().daily == 38553
     assert reader.energy().mtd == 277266
 
+    assert reader.consumption() == EnergyYield(6278, 30456, 237250)
+    assert reader.production() == EnergyYield(0, 0, 0)
+
     assert len(reader.mtus) == 4
     assert reader.mtus[0].id == "109CE0"
     assert reader.mtus[0].description == "Pan 1"
-    assert reader.mtus[0].type == MtuType.NET
+    assert reader.mtus[0].type == MtuType.LOAD
     assert reader.mtus[0].power_cal_factor == 100
     assert reader.mtus[0].voltage_cal_factor == 100
     assert reader.mtus[1].id == "109CAD"
     assert reader.mtus[1].description == "Pan 2"
-    assert reader.mtus[1].type == MtuType.NET
+    assert reader.mtus[1].type == MtuType.LOAD
     assert reader.mtus[1].power_cal_factor == 100
     assert reader.mtus[1].voltage_cal_factor == 100
     assert reader.mtus[2].id == "109D3A"
