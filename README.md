@@ -4,7 +4,11 @@ Unofficial library for reading from The Energy Detective power meters
 
 This library supports the TED5000 and TED6000 devices.
 
-It is based on @realumhelp's [ted6000py](https://github.com/realumhelp/ted6000py), Home Assistant's ted5000 implementation, and @gtdiehl and @jesserizzo's [envoy_reader](https://github.com/gtdiehl/envoy_reader/). Also huge thanks to @realumhelp for patching support for consumption/production distinction!
+It is based on [@realumhelp]'s [ted6000py](https://github.com/realumhelp/ted6000py), Home Assistant's ted5000 implementation, and [@gtdiehl] and [@jesserizzo]'s [envoy_reader](https://github.com/gtdiehl/envoy_reader/). Also huge thanks to [@realumhelp] for helping write and review much of the code!
+
+[@realumhelp]: https://github.com/realumhelp
+[@gtdiehl]: https://github.com/gtdiehl
+[@jesserizzo]: https://github.com/jesserizzo
 
 ## Usage
 
@@ -19,7 +23,10 @@ try:
     await reader.update()
     reader.print_to_console() # Print all information
     print(reader.energy()) # Total energy
-    print(reader.mtus[0].energy()) # # Energy per MTU
+    print(reader.consumption()) # Load energy only
+    print(reader.production()) # Generated energy only
+
+    print(reader.mtus[0].energy()) # Energy per MTU
     print(reader.mtus[0].power())
     print(reader.spyders[0].ctgroups[0].energy()) # Energy per ctgroup
 
