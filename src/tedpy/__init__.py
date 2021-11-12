@@ -1,6 +1,16 @@
 """Module to read energy consumption from a TED energy meter."""
 import httpx
 
+from .dataclasses import (
+    EnergyYield,
+    MtuType,
+    Power,
+    SystemType,
+    TedCt,
+    TedCtGroup,
+    TedMtu,
+    TedSpyder,
+)
 from .ted import TED
 from .ted5000 import TED5000
 from .ted6000 import TED6000
