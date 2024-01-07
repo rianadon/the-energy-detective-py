@@ -1,5 +1,6 @@
 """Implementation for the TED6000 meter."""
 import asyncio
+from datetime import datetime
 from typing import Any, Dict
 
 import httpx
@@ -17,6 +18,7 @@ from .dataclasses import (
 from .ted import TED
 
 ENDPOINT_URL_SETTINGS = "http://{}/api/SystemSettings.xml"
+ENDPOINT_URL_RATE = "http://{}/api/Rate.xml"
 ENDPOINT_URL_DASHBOARD = "http://{}/api/DashData.xml?T=0&D={}&M=0"
 ENDPOINT_URL_MTUDASHBOARD = "http://{}/api/DashData.xml?T=0&D=255&M={}"
 ENDPOINT_URL_MTU = "http://{}/api/SystemOverview.xml?T=0&D=0&M=0"
@@ -31,6 +33,7 @@ class TED6000(TED):
         super().__init__(host, async_client)
 
         self.endpoint_settings_results: Any = None
+        self.endpoint_rate_results: Any = None
         self.endpoint_mtu_results: Any = None
         self.endpoint_spyder_results: Any = None
         self.endpoint_dash_results: Dict[int, Any] = dict()
@@ -40,6 +43,7 @@ class TED6000(TED):
         """Fetch settings and power data from the endpoints."""
         await asyncio.gather(
             self._update_endpoint("endpoint_settings_results", ENDPOINT_URL_SETTINGS),
+            self._update_endpoint("endpoint_rate_results", ENDPOINT_URL_RATE),
         )
 
         self._parse_mtus()
@@ -75,6 +79,10 @@ class TED6000(TED):
         return self.endpoint_settings_results["SystemSettings"]["Gateway"][
             "GatewayDescription"
         ]
+
+    def gateway_time(self) -> datetime:
+        timestamp = int(self.endpoint_rate_results["Rate"]["Time"])
+        return datetime.fromtimestamp(timestamp)
 
     @property
     def polling_delay(self) -> int:

@@ -1,5 +1,6 @@
 """Implementation for the TED5000 meter."""
 import asyncio
+from datetime import datetime
 from typing import Any
 
 import httpx
@@ -45,6 +46,16 @@ class TED5000(TED):
         return self.endpoint_settings_results["SystemSettings"]["Gateway"][
             "GatewayDescription"
         ]
+
+    def gateway_time(self) -> datetime:
+        data = self.endpoint_data_results["LiveData"]
+        hour = int(data["GatewayTime"]["Hour"])
+        minute = int(data["GatewayTime"]["Minute"])
+        second = int(data["GatewayTime"]["Second"])
+        month = int(data["GatewayTime"]["Month"])
+        day = int(data["GatewayTime"]["Day"])
+        year = int(data["GatewayTime"]["Year"]) + 2000
+        return datetime(year, month, day, hour, minute, second)
 
     def energy(self) -> EnergyYield:
         """Return energy yield information for the whole system."""

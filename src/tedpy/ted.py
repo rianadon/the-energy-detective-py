@@ -1,5 +1,6 @@
 """Base class for TED energy meters."""
 import logging
+from datetime import datetime
 from typing import Any, List
 
 import httpx
@@ -50,6 +51,10 @@ class TED:
     def gateway_description(self) -> str:
         """Return the description for the gateway."""
         return ""
+
+    def gateway_time(self) -> datetime:
+        """Return the current time of the gateway."""
+        raise NotImplementedError()
 
     @property
     def system_type(self) -> SystemType:
@@ -113,6 +118,8 @@ class TED:
     def print_to_console(self) -> None:
         """Print all the settings and energy yield values to the console."""
         print("Gateway id:", self.gateway_id)
+        print("Gateway description:", self.gateway_description)
+        print("Gateway time:", self.gateway_time())
         print("Net Energy:", format_energy_yield(self.energy()))
         print("  Consumed:", format_energy_yield(self.consumption()))
         print("  Produced:", format_energy_yield(self.production()))
